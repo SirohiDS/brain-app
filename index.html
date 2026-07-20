@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="NeuroForge">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f0edff">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>NeuroForge — Brain Training Suite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f0edff; --panel:#fff; --ink:#1c1636; --dim:#8b83b0; --line:#1c1636;
+    --accent:#8b5cff; --accent2:#00c9dc; --lime:#c6ff3c; --yellow:#ffd23c; --pink:#ff7fb0;}
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; touch-action:manipulation;}
+  body{min-height:100vh; background:radial-gradient(1200px 800px at 70% -10%, #e2d9ff 0%, var(--bg) 55%);
+    color:var(--ink); font-family:'Space Grotesk',-apple-system,'Segoe UI',system-ui,sans-serif;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px 16px;
+    padding-top:calc(24px + env(safe-area-inset-top)); padding-bottom:calc(24px + env(safe-area-inset-bottom));}
+  .logo{width:88px; height:88px; border-radius:26px; background:var(--lime); border:3px solid var(--line);
+    box-shadow:7px 7px 0 var(--line); display:flex; align-items:center; justify-content:center; font-size:46px; margin-bottom:16px;}
+  h1{font-family:'Sora'; font-weight:800; font-size:30px; margin:2px 0 6px; letter-spacing:.5px; text-align:center;}
+  .sub{color:var(--dim); margin-bottom:26px; text-align:center; line-height:1.55; max-width:340px;}
+  .apps{display:flex; flex-direction:column; gap:16px; width:100%; max-width:430px;}
+  a.app{display:flex; align-items:center; gap:16px; border:3px solid var(--line);
+    border-radius:22px; padding:18px; text-decoration:none; color:var(--ink);
+    box-shadow:6px 6px 0 var(--line); transition:transform .1s, box-shadow .1s;}
+  a.app:hover{transform:translate(-2px,-2px); box-shadow:8px 8px 0 var(--line);}
+  a.app:active{transform:translate(3px,3px); box-shadow:2px 2px 0 var(--line);}
+  a.app.train{background:var(--lime);}
+  a.app.reflex{background:var(--accent);}
+  a.app.reflex h2, a.app.reflex p{color:#fff;} a.app.reflex .ic{background:#fff;}
+  .ic{font-size:34px; width:58px; height:58px; display:flex; align-items:center; justify-content:center; flex:none;
+    background:#fff; border:2.5px solid var(--line); border-radius:16px;}
+  .app h2{font-family:'Sora'; font-weight:800; font-size:17px; margin-bottom:3px;}
+  .app p{font-size:12.5px; line-height:1.4; opacity:.85;}
+  .foot{margin-top:26px; font-size:12px; color:var(--dim); text-align:center; line-height:1.6;}
+  .foot b{color:var(--ink);}
+</style>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#8b5cff"/><rect x="28" y="28" width="44" height="44" rx="13" fill="#c6ff3c" stroke="#1c1636" stroke-width="3"/><text x="50" y="58" font-size="26" text-anchor="middle">🧠</text></svg></template>
+</head>
+<body>
+  <div class="logo">🧠</div>
+  <h1>NeuroForge Suite</h1>
+  <p class="sub">Your daily brain gym. Train memory, focus &amp; logic — then push your reflexes in the 3D arena.</p>
+  <div class="apps">
+    <a class="app train" href="NeuroForge.html">
+      <div class="ic">🧩</div>
+      <div><h2>Daily Training</h2><p>32 adaptive challenges · streaks, XP, brain score, detox missions</p></div>
+    </a>
+    <a class="app reflex" href="ReflexForge.html">
+      <div class="ic">⚡</div>
+      <div><h2>ReflexForge Arena</h2><p>5 arcade modes · reaction grades, combos, survival</p></div>
+    </a>
+  </div>
+  <p class="foot">Works offline after first load · Progress saves on this device<br>Tip: Share → <b>Add to Home Screen</b> to install as an app</p>
+<script>
+  if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+</script>
+</body>
+</html>

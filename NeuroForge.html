@@ -1,0 +1,2237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="NeuroForge">
+<meta name="theme-color" content="#f3f5fc">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>NeuroForge — Daily Brain Training</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f0edff; --bggrad:radial-gradient(1200px 800px at 75% -10%, #e2d9ff 0%, #f0edff 55%);
+    --panel:#ffffff; --panel2:#f5f2ff; --soft:#efeaff; --input:#f5f2ff;
+    --ink:#1c1636; --dim:#8b83b0; --line:#1c1636; --bw:2.5px;
+    --accent:#8b5cff; --accent2:#00c9dc; --pink:#ff7fb0; --yellow:#ffd23c; --lime:#c6ff3c;
+    --good:#2fae63; --bad:#e5455f; --gold:#b57e00;
+    --card-sh:5px 5px 0 var(--line); --btn-sh:4px 4px 0 var(--line); --chip-sh:3px 3px 0 var(--line);
+    --radius:22px;
+    --nav-bg:#ffffff;
+  }
+  body[data-theme="dark"]{
+    --bg:#0c0e1c; --bggrad:radial-gradient(1200px 800px at 75% -10%, #241a4d 0%, #0c0e1c 58%);
+    --panel:#171a2e; --panel2:#20243e; --soft:#20243e; --input:#20243e;
+    --ink:#eef1ff; --dim:#9aa2c8; --line:#3a3f5e; --bw:1.5px;
+    --card-sh:0 12px 30px rgba(0,0,0,.45); --btn-sh:0 8px 20px rgba(139,92,255,.45); --chip-sh:0 4px 12px rgba(0,0,0,.35);
+    --nav-bg:rgba(18,21,38,.92);
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%;}
+  body{background:var(--bggrad); background-attachment:fixed; color:var(--ink);
+    font-family:'Space Grotesk',-apple-system,'Segoe UI',system-ui,sans-serif; min-height:100vh;
+    touch-action:manipulation; transition:background .25s,color .25s;}
+  button, .cell, .choice, .simonPad, .reactZone, .goZone, .shapeOpt, .nbBtn, .memoryDisplay, .symbolRow{
+    -webkit-user-select:none; user-select:none; touch-action:manipulation;}
+
+  /* ---------- HEADER ---------- */
+  #topbar{display:flex; align-items:center; gap:10px; padding:14px 18px;
+    padding-top:calc(14px + env(safe-area-inset-top));
+    background:var(--nav-bg); backdrop-filter:blur(10px); position:sticky; top:0; z-index:20;
+    border-bottom:var(--bw) solid var(--line);}
+  #topbar .brand{display:flex; align-items:center; gap:9px; text-decoration:none; margin-right:auto;}
+  #topbar .brandIc{width:36px; height:36px; border-radius:11px; background:linear-gradient(135deg,var(--accent2),var(--accent));
+    display:flex; align-items:center; justify-content:center; font-size:19px; border:var(--bw) solid var(--line); box-shadow:var(--chip-sh);}
+  #topbar .brandName{font-family:'Sora'; font-weight:800; font-size:16px; letter-spacing:.5px; color:var(--ink);}
+  #topbar .brandRank{font-size:11px; color:var(--dim); font-weight:600;}
+  .pill{background:var(--panel2); border:2px solid var(--line); border-radius:999px; padding:5px 11px; font-size:12.5px;
+    color:var(--dim); font-weight:600; display:inline-flex; align-items:center; gap:4px;}
+  .pill b{color:var(--ink); font-family:'Sora'; font-weight:800;}
+  .gearBtn{width:40px; height:40px; border-radius:12px; background:var(--panel); border:var(--bw) solid var(--line);
+    display:flex; align-items:center; justify-content:center; font-size:18px; cursor:pointer; box-shadow:var(--chip-sh); color:var(--ink);}
+  #hudCoins, #hudFocus{position:absolute; left:-9999px;}
+
+  #app{max-width:760px; margin:0 auto; padding:20px 16px 110px;}
+
+  /* ---------- CARDS / TYPE ---------- */
+  .card{background:var(--panel); border:var(--bw) solid var(--line); border-radius:var(--radius); padding:24px; margin-bottom:16px;
+    box-shadow:var(--card-sh);}
+  h1{font-family:'Sora'; font-weight:800; font-size:27px; margin-bottom:8px; line-height:1.1; color:var(--ink);}
+  h2{font-family:'Sora'; font-weight:800; font-size:21px; margin-bottom:8px; color:var(--ink);}
+  h3{font-family:'Sora'; font-size:12px; color:var(--accent); text-transform:uppercase; letter-spacing:1.2px; font-weight:800; margin-bottom:10px;}
+  p{line-height:1.55; color:var(--dim); margin-bottom:10px; text-wrap:pretty;}
+  p.big{color:var(--ink); font-size:17px;}
+
+  .btn{display:inline-block; background:var(--accent); color:#fff; border:var(--bw) solid var(--line); border-radius:14px;
+    padding:13px 26px; font-family:'Sora'; font-size:16px; font-weight:800; cursor:pointer; box-shadow:var(--btn-sh);
+    transition:transform .08s, box-shadow .12s;}
+  .btn:hover{transform:translate(-1px,-1px);}
+  .btn:active{transform:translate(2px,2px); box-shadow:0 0 0 var(--line);}
+  .btn.secondary{background:var(--panel); color:var(--ink);}
+  .btn.small{padding:9px 16px; font-size:14px; box-shadow:var(--chip-sh);}
+  .btn:disabled{opacity:.4; cursor:default; transform:none;}
+
+  input[type=text]{width:100%; background:var(--input); border:var(--bw) solid var(--line); border-radius:14px; color:var(--ink);
+    padding:14px 15px; font-family:'Space Grotesk'; font-size:17px; font-weight:600; outline:none;}
+  input[type=text]:focus{box-shadow:var(--btn-sh);}
+
+  .memoryDisplay{font-family:'Sora'; font-size:24px; font-weight:700; letter-spacing:1px; line-height:1.7; text-align:center; padding:26px 12px;
+    background:var(--soft); border:var(--bw) solid var(--line); border-radius:16px; margin:14px 0; word-wrap:break-word; color:var(--ink);}
+  .timerbar{height:12px; background:var(--soft); border:2px solid var(--line); border-radius:99px; overflow:hidden; margin:12px 0;}
+  .timerbar>div{height:100%; background:linear-gradient(90deg,var(--accent2),var(--accent)); width:100%; transition:width .25s linear;}
+
+  .grid{display:grid; gap:8px; justify-content:center; margin:16px auto;}
+  .cell{width:58px; height:58px; border-radius:12px; background:var(--soft); border:2px solid var(--line); cursor:pointer; transition:background .15s, transform .1s;}
+  .cell:active{transform:scale(.94);}
+  .cell.lit{background:linear-gradient(135deg,var(--accent2),var(--accent)); border-color:var(--line);}
+  .cell.picked{background:var(--accent); opacity:.55;}
+  .cell.hit{background:var(--good); border-color:var(--line);} .cell.miss{background:var(--bad); border-color:var(--line);}
+
+  .choices{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px;}
+  .choice{flex:1 1 40%; background:var(--panel2); border:var(--bw) solid var(--line); border-radius:14px; padding:15px; font-size:16px;
+    color:var(--ink); cursor:pointer; text-align:center; font-family:'Sora'; font-weight:700; box-shadow:var(--chip-sh); transition:transform .08s;}
+  .choice:hover{transform:translate(-1px,-1px);}
+  .choice:active{transform:translate(2px,2px); box-shadow:none;}
+  .choice.correct{background:var(--lime); border-color:var(--line); color:var(--ink); box-shadow:var(--chip-sh);}
+  .choice.wrong{background:var(--pink); border-color:var(--line); color:var(--ink);}
+
+  .feedback{margin-top:14px; padding:16px; border-radius:16px; font-size:15px; line-height:1.5; display:none; border:var(--bw) solid var(--line); color:var(--ink);}
+  .feedback.good{display:block; background:color-mix(in srgb,var(--lime) 55%, var(--panel)); box-shadow:var(--chip-sh);}
+  .feedback.bad{display:block; background:color-mix(in srgb,var(--pink) 45%, var(--panel)); box-shadow:var(--chip-sh);}
+  .feedback b{color:var(--ink);}
+
+  .bigNum{font-family:'Sora'; font-size:48px; font-weight:800; text-align:center; margin:10px 0; color:var(--ink);}
+  .statgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin:16px 0;}
+  .stat{background:var(--panel2); border:var(--bw) solid var(--line); border-radius:16px; padding:15px; text-align:center; box-shadow:var(--chip-sh);}
+  .stat .v{font-family:'Sora'; font-size:26px; font-weight:800; color:var(--ink);} .stat .l{font-size:11px; color:var(--dim); text-transform:uppercase; letter-spacing:.5px; font-weight:700;}
+  .scorebar{display:flex; align-items:center; gap:10px; margin:8px 0;}
+  .scorebar .name{width:130px; font-size:13px; color:var(--ink); font-weight:600;}
+  .scorebar .track{flex:1; height:14px; background:var(--soft); border:2px solid var(--line); border-radius:99px; overflow:hidden;}
+  .scorebar .fill{height:100%; border-radius:99px; background:linear-gradient(90deg,var(--accent2),var(--accent));}
+  .scorebar .val{width:36px; text-align:right; font-family:'Sora'; font-weight:800; font-size:14px; color:var(--ink);}
+  .badge{display:inline-block; background:var(--yellow); border:2px solid var(--line); color:var(--ink);
+    border-radius:999px; padding:6px 14px; font-size:13px; font-weight:800; margin:3px; box-shadow:var(--chip-sh);}
+  .chart{display:flex; align-items:flex-end; gap:5px; height:120px; margin:14px 0; padding:10px; background:var(--soft); border:2px solid var(--line); border-radius:16px;}
+  .chart .bar{flex:1; background:linear-gradient(180deg,var(--accent),var(--accent2)); border-radius:5px 5px 0 0; min-height:4px; position:relative;}
+  .chart .bar span{position:absolute; top:-18px; left:50%; transform:translateX(-50%); font-size:10px; color:var(--dim); font-weight:700;}
+  .stroopWord{font-family:'Sora'; font-size:54px; font-weight:800; text-align:center; margin:24px 0;}
+  .reactZone{height:210px; border-radius:18px; display:flex; align-items:center; justify-content:center;
+    font-family:'Sora'; font-size:22px; font-weight:800; cursor:pointer; margin:14px 0; background:var(--soft); border:var(--bw) solid var(--line); color:var(--ink); box-shadow:var(--card-sh);}
+  .reactZone.go{background:var(--lime); color:var(--ink);}
+  .reactZone.wait{background:var(--pink); color:var(--ink);}
+  .facecard{display:inline-block; text-align:center; margin:8px; padding:14px 18px; background:var(--panel2); border:2px solid var(--line); border-radius:16px; box-shadow:var(--chip-sh);}
+  .facecard .face{font-size:46px;} .facecard .nm{font-family:'Sora'; font-weight:800; margin-top:6px; color:var(--ink);}
+  .symbolRow{font-size:40px; text-align:center; letter-spacing:14px; padding:20px 0; color:var(--ink);}
+  .palette{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:12px;}
+  .palette button{font-size:30px; background:var(--panel2); border:var(--bw) solid var(--line); border-radius:14px; padding:8px 14px; cursor:pointer; box-shadow:var(--chip-sh); color:var(--ink);}
+  .seqBuild{min-height:52px; font-size:30px; text-align:center; letter-spacing:10px; background:var(--soft); border:2px solid var(--line); border-radius:14px; padding:10px; margin-top:12px; color:var(--ink);}
+  .center{text-align:center;}
+  .mt{margin-top:16px;}
+  .breath{width:140px; height:140px; border-radius:50%; margin:26px auto; background:radial-gradient(circle,var(--accent2),var(--accent));
+    animation:breathe 8s ease-in-out infinite; display:flex; align-items:center; justify-content:center; font-family:'Sora'; font-weight:800; color:#fff; border:var(--bw) solid var(--line);}
+  @keyframes breathe{0%,100%{transform:scale(.6);} 50%{transform:scale(1.15);}}
+  .xpToast{position:fixed; bottom:96px; left:50%; transform:translateX(-50%); background:var(--ink); color:var(--lime); border:var(--bw) solid var(--line); border-radius:14px;
+    padding:12px 20px; font-family:'Sora'; font-weight:800; z-index:99; animation:pop .3s ease; box-shadow:var(--card-sh); white-space:nowrap;}
+  @keyframes pop{from{transform:translate(-50%,20px); opacity:0;} to{transform:translate(-50%,0); opacity:1;}}
+  .progressLabel{font-size:13px; color:var(--dim); margin-bottom:4px; display:flex; justify-content:space-between;}
+  .mini{width:22px; height:22px; border-radius:5px; background:var(--soft); border:2px solid var(--line);}
+  .mini.on{background:linear-gradient(135deg,var(--accent2),var(--accent)); border-color:var(--line);}
+  .shapeOpt{display:inline-block; padding:10px; margin:6px; background:var(--panel2); border:var(--bw) solid var(--line); border-radius:14px; cursor:pointer; box-shadow:var(--chip-sh); color:var(--ink);}
+  .shapeOpt:hover{transform:translate(-1px,-1px);}
+  .shapeOpt.correct{background:var(--lime);}
+  .shapeOpt.wrong{background:var(--pink);}
+  .miniGrid{display:grid; gap:3px;}
+  .simonPads{display:grid; grid-template-columns:repeat(2,110px); gap:12px; justify-content:center; margin:18px 0;}
+  .simonPad{height:90px; border-radius:16px; border:var(--bw) solid var(--line); cursor:pointer; opacity:.55; transition:opacity .1s, transform .1s; box-shadow:var(--chip-sh);}
+  .simonPad.flash{opacity:1; transform:scale(1.06);}
+  .simonPad:active{opacity:1;}
+  .dotBox{position:relative; height:240px; background:var(--soft); border:var(--bw) solid var(--line); border-radius:16px; margin:14px 0; overflow:hidden;}
+  .dotBox .dot{position:absolute; width:13px; height:13px; border-radius:50%; background:var(--accent);}
+  .nbButtons{display:flex; gap:12px; justify-content:center; margin-top:14px;}
+  .nbBtn{flex:1; max-width:220px; padding:16px; font-family:'Sora'; font-size:15px; font-weight:800; border-radius:14px; border:var(--bw) solid var(--line); background:var(--panel2); color:var(--ink); cursor:pointer; box-shadow:var(--chip-sh);}
+  .nbBtn.armed{background:var(--accent); color:#fff;}
+  .goZone{height:200px; border-radius:18px; background:var(--soft); border:var(--bw) solid var(--line); display:flex; align-items:center; justify-content:center; font-size:64px; cursor:pointer; margin:14px 0; box-shadow:var(--card-sh);}
+  .pegRow{display:flex; gap:12px; justify-content:center; margin:18px 0;}
+  .peg{flex:1; max-width:150px; min-height:170px; background:var(--soft); border:var(--bw) solid var(--line); border-radius:16px;
+    display:flex; flex-direction:column-reverse; align-items:center; padding:8px 4px; cursor:pointer; gap:4px;}
+  .peg.sel{background:var(--accent); }
+  .disk{height:24px; border-radius:8px; background:linear-gradient(135deg,var(--accent2),var(--accent)); color:#fff;
+    font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; border:2px solid var(--line);}
+  .flipCard{width:64px; height:64px; font-size:30px; border-radius:14px; border:var(--bw) solid var(--line); background:var(--panel2); cursor:pointer; color:var(--ink); box-shadow:var(--chip-sh);}
+  .flipCard.up{background:var(--yellow);}
+  .flipCard.done{background:var(--lime); cursor:default;}
+  .sortBtn{width:64px; height:64px; font-family:'Sora'; font-size:20px; font-weight:800; border-radius:14px; border:var(--bw) solid var(--line); background:var(--panel2); color:var(--ink); cursor:pointer; box-shadow:var(--chip-sh);}
+  .sortBtn.gone{opacity:.2; pointer-events:none;}
+  .sortBtn.err{background:var(--pink);}
+  .matCell{width:72px; height:60px; background:var(--soft); border:2px solid var(--line); border-radius:12px;
+    display:flex; align-items:center; justify-content:center; font-size:19px; letter-spacing:1px; color:var(--ink);}
+  .matCell.q{border:var(--bw) dashed var(--accent); font-size:26px; color:var(--accent); background:var(--panel);}
+
+  /* ---------- BOTTOM NAV ---------- */
+  #nav{position:fixed; left:0; right:0; bottom:0; z-index:20; height:70px;
+    padding-bottom:env(safe-area-inset-bottom);
+    background:var(--nav-bg); backdrop-filter:blur(12px); border-top:var(--bw) solid var(--line);
+    display:flex; align-items:center; justify-content:space-around;}
+  #nav button{background:none; border:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px;
+    color:var(--dim); font-family:'Sora'; font-weight:700; font-size:10px; padding:6px 10px;}
+  #nav button .ic{font-size:21px;}
+  #nav button.on{color:var(--accent);}
+  #nav .navPlay{margin-top:-22px;}
+  #nav .navPlay .ic{width:54px; height:54px; border-radius:50%; background:var(--accent); color:#fff; border:var(--bw) solid var(--line);
+    display:flex; align-items:center; justify-content:center; font-size:24px; box-shadow:var(--btn-sh);}
+
+  /* ---------- TOGGLES / SETTINGS ROWS ---------- */
+  .setGroup{background:var(--panel); border:var(--bw) solid var(--line); border-radius:18px; box-shadow:var(--card-sh); overflow:hidden; margin-bottom:18px;}
+  .setRow{display:flex; align-items:center; gap:13px; padding:15px 16px; border-bottom:2px solid var(--soft);}
+  .setRow:last-child{border-bottom:none;}
+  .setRow .ric{font-size:20px; width:26px; text-align:center;}
+  .setRow .lbl{flex:1;}
+  .setRow .lbl .t{font-family:'Sora'; font-weight:700; font-size:14.5px; color:var(--ink);}
+  .setRow .lbl .d{font-size:11.5px; color:var(--dim);}
+  .setLabel{font-size:11px; font-weight:800; color:var(--dim); text-transform:uppercase; letter-spacing:1px; margin:6px 4px 9px;}
+  .tog{width:50px; height:29px; border-radius:99px; background:var(--soft); border:2px solid var(--line); position:relative; cursor:pointer; flex:none; transition:background .15s;}
+  .tog::after{content:''; position:absolute; left:2px; top:1px; width:23px; height:23px; border-radius:50%; background:#fff; border:2px solid var(--line); transition:left .15s;}
+  .tog.on{background:var(--accent);}
+  .tog.on::after{left:23px;}
+  .seg{display:flex; gap:8px;}
+  .seg button{flex:1; padding:9px; border-radius:10px; border:2px solid var(--line); background:var(--panel2); color:var(--ink); font-family:'Sora'; font-weight:700; font-size:13px; cursor:pointer;}
+  .seg button.on{background:var(--accent); color:#fff;}
+
+  /* achievements */
+  .achGrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:12px;}
+  .achCard{border:var(--bw) solid var(--line); border-radius:18px; padding:16px 12px; text-align:center; box-shadow:var(--chip-sh);}
+  .achCard .ai{font-size:38px;} .achCard .an{font-family:'Sora'; font-weight:800; font-size:13px; margin-top:6px; color:var(--ink);}
+  .achCard .ad{font-size:10.5px; color:var(--dim); font-weight:600; margin-top:2px;}
+  .achCard.locked{background:var(--soft); border-style:dashed; opacity:.7; box-shadow:none;}
+  .achCard.locked .ai{filter:grayscale(1);}
+
+  /* colorblind assist */
+  body[data-cb="on"] .choice.correct::after{content:' ✓'; font-weight:900;}
+  body[data-cb="on"] .choice.wrong::after{content:' ✕'; font-weight:900;}
+  body[data-cb="on"] .cell.hit{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.5) 0 4px,transparent 4px 8px);}
+  body[data-cb="on"] .cell.miss{background-image:repeating-linear-gradient(135deg,rgba(0,0,0,.35) 0 4px,transparent 4px 8px);}
+  body[data-cb="on"] .cell.lit{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.4) 0 5px,transparent 5px 10px);}
+
+  /* text size */
+  body[data-size="large"]{font-size:112%;}
+  body[data-size="large"] p, body[data-size="large"] .choice, body[data-size="large"] input[type=text]{font-size:18px;}
+  body[data-size="large"] .btn{font-size:18px;}
+  body[data-size="xl"]{font-size:125%;}
+  body[data-size="xl"] p, body[data-size="xl"] .choice, body[data-size="xl"] input[type=text]{font-size:20px;}
+  body[data-size="xl"] .btn{font-size:19px;} body[data-size="xl"] .memoryDisplay{font-size:28px;}
+
+  @media (max-width:480px){
+    .flipCard,.sortBtn{width:52px; height:52px;}
+    .matCell{width:56px; height:48px; font-size:15px;}
+    .peg{min-height:140px;}
+    #topbar{padding:11px 12px;} #topbar .brandName{font-size:15px;}
+    .pill{font-size:11px; padding:4px 9px;}
+    #app{padding:16px 12px 100px;}
+    .card{padding:18px 15px;}
+    h1{font-size:22px;} h2{font-size:18px;}
+    .cell{width:44px; height:44px;}
+    .memoryDisplay{font-size:19px; padding:18px 8px;}
+    .bigNum{font-size:34px;}
+    .stroopWord{font-size:40px; margin:16px 0;}
+    .symbolRow{font-size:30px; letter-spacing:8px;}
+    .choice{flex:1 1 100%; padding:14px;}
+    .btn{padding:13px 20px; font-size:15px; width:100%; margin-bottom:8px;}
+    .btn.small{width:auto; margin-bottom:0;}
+    .facecard{padding:9px 11px; margin:5px;} .facecard .face{font-size:36px;}
+    .reactZone,.goZone{height:170px;}
+    .simonPads{grid-template-columns:repeat(2, 42vw); gap:10px;}
+    .simonPad{height:24vw;}
+    .nbButtons{flex-direction:row;} .nbBtn{padding:13px 6px; font-size:13px;}
+    .statgrid{grid-template-columns:repeat(2,1fr);}
+    .scorebar .name{width:100px; font-size:12px;}
+  }
+  @media (min-width:900px){ #app{max-width:820px;} }
+</style>
+</head>
+<body>
+<div id="topbar">
+  <a class="brand" href="index.html">
+    <span class="brandIc">🧠</span>
+    <span><span class="brandName">NeuroForge</span><br><span class="brandRank">🏅 <span id="hudRank">Novice</span></span></span>
+  </a>
+  <span class="pill">🔥 <b id="hudStreak">0</b></span>
+  <span class="pill">✨ <b id="hudXp">0</b></span>
+  <span class="gearBtn" onclick="settingsScreen()">⚙️</span>
+  <b id="hudCoins">0</b><b id="hudFocus">0</b>
+</div>
+<div id="app"></div>
+<nav id="nav">
+  <button data-nav="home" onclick="navGo('home')"><span class="ic">🏠</span>Home</button>
+  <button data-nav="insights" onclick="navGo('insights')"><span class="ic">📊</span>Insights</button>
+  <button class="navPlay" onclick="navGo('play')"><span class="ic">▶</span></button>
+  <button data-nav="awards" onclick="navGo('awards')"><span class="ic">🏆</span>Awards</button>
+  <button data-nav="settings" onclick="navGo('settings')"><span class="ic">⚙️</span>Settings</button>
+</nav>
+
+<script>
+'use strict';
+/* ================= PERSISTENT STATE ================= */
+const DEFAULTS = {
+  xp:0, coins:0, focusPoints:0, streak:0, lastPlayed:null,
+  skill:{memory:2, visual:2, focus:2, calc:2, reasoning:2, reaction:2, flexibility:2},
+  history:[], achievements:[], bests:{}, sessionsPlayed:0
+};
+let S = load();
+function load(){
+  try{ const raw = localStorage.getItem('neuroforge'); if(raw){
+    const obj = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), JSON.parse(raw));
+    for(const k in DEFAULTS.skill){ if(!(k in obj.skill)) obj.skill[k] = DEFAULTS.skill[k]; }
+    return obj;
+  } }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULTS));
+}
+function save(){ try{ localStorage.setItem('neuroforge', JSON.stringify(S)); }catch(e){} refreshHud(); }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+const RANKS = [[0,'Novice'],[500,'Apprentice'],[1500,'Adept'],[3000,'Strategist'],[5500,'Mastermind'],[9000,'Grandmaster'],[15000,'Brain Titan']];
+function rank(){ let r='Novice'; for(const [t,n] of RANKS){ if(S.xp>=t) r=n; } return r; }
+function refreshHud(){
+  document.getElementById('hudRank').textContent = rank();
+  document.getElementById('hudXp').textContent = S.xp;
+  document.getElementById('hudCoins').textContent = S.coins;
+  document.getElementById('hudStreak').textContent = S.streak;
+  document.getElementById('hudFocus').textContent = S.focusPoints;
+}
+function toast(msg){
+  const t = document.createElement('div'); t.className='xpToast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(), 2600);
+}
+
+/* ================= HELPERS ================= */
+const app = document.getElementById('app');
+let __timers = [];
+function startInterval(fn, ms){ const id = setInterval(fn, ms); __timers.push(id); return id; }
+function screen(html){ __timers.forEach(clearInterval); __timers = []; app.innerHTML = html; window.scrollTo(0,0); return app; }
+function rnd(n){ return Math.floor(Math.random()*n); }
+function pick(arr){ return arr[rnd(arr.length)]; }
+function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=rnd(i+1); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function sample(arr,n){ return shuffle(arr).slice(0,n); }
+function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function norm(s){ return String(s).toLowerCase().trim().replace(/[^a-z0-9 ]/g,''); }
+function clamp(x,a,b){ return Math.max(a, Math.min(b,x)); }
+function gridCols(size){ const px = window.innerWidth<=480? 44 : 58; return `grid-template-columns:repeat(${size},${px}px)`; }
+
+function countdownBar(el, seconds, onDone){
+  const fill = el.querySelector('div'); let left = seconds;
+  const iv = startInterval(()=>{
+    left -= 0.25; fill.style.width = Math.max(0,(left/seconds)*100)+'%';
+    if(left<=0){ clearInterval(iv); onDone && onDone(); }
+  }, 250);
+  return ()=>clearInterval(iv);
+}
+
+/* ================= CONTENT BANKS ================= */
+const WORDS = ['lantern','velvet','cactus','orbit','spoon','thunder','maple','dice','anchor','breeze','copper','dagger','ember','falcon','glacier','harbor','ivory','jungle','kettle','lagoon','marble','nectar','onyx','piston','quartz','raven','saddle','tundra','umbrella','vortex','walnut','yonder','zephyr','bishop','candle','dolphin','engine','feather','goblet','hammock','island','jigsaw','krypton','lever','mosaic','needle','oasis','parrot','quiver','rocket','sphinx','trellis','urchin','violin','whistle','yacht','zigzag','beacon','cider','drift','echo','flint','grove','helix','ingot','jester','knoll','lyric','meadow','nimbus','opal','prism','quill','ridge','summit','tulip','valley','wharf','apron','bramble','crayon','dune','easel','fjord','gears','hazel','icicle','jade','kayak','lotus','mirth','nomad','otter','pebble','rusk','sonar','tiger','vault','wren'];
+const NAMES = ['Aarav','Meera','Kabir','Ishita','Rohan','Ananya','Dev','Priya','Arnav','Tara','Vikram','Naina','Samir','Zoya','Rahul','Diya','Karan','Sana','Nikhil','Rhea','Aditya','Pooja','Manav','Kiara'];
+const FACES = ['👨🏽','👩🏻','👴🏼','👵🏽','🧔🏻','👱🏽‍♀️','👨🏿','👩🏾','🧑🏼','👳🏽‍♂️','👨🏻‍🦰','👩🏼‍🦱','🧓🏾','👨🏼‍🦳','👩🏽‍🦰','🧑🏿‍🦱'];
+const SHOP = ['milk','bread','tomatoes','rice','shampoo','batteries','honey','olive oil','paneer','coffee','notebooks','apples','detergent','yogurt','onions','toothpaste','lentils','butter','green tea','sponges','bananas','eggs','flour','pickles','almonds','soap','ginger','chips','juice','candles'];
+const SYMBOLS = ['★','◆','●','▲','♠','♣','♥','♦','☾','☀','✚','✿','⚑','☂','♞','⚙'];
+const ODD_SETS = [
+  {items:['apple','banana','carrot','mango'], odd:'carrot', why:'Carrot is a vegetable; the rest are fruits.'},
+  {items:['mercury','venus','titan','mars'], odd:'titan', why:'Titan is a moon; the others are planets.'},
+  {items:['oak','pine','rose','birch'], odd:'rose', why:'Rose is a flower/shrub; the rest are trees.'},
+  {items:['guitar','violin','flute','cello'], odd:'flute', why:'Flute is a wind instrument; the rest are strings.'},
+  {items:['python','java','html','ruby'], odd:'html', why:'HTML is a markup language, not a programming language.'},
+  {items:['copper','iron','brass','zinc'], odd:'brass', why:'Brass is an alloy; the others are elements.'},
+  {items:['nile','amazon','sahara','ganges'], odd:'sahara', why:'Sahara is a desert; the rest are rivers.'},
+  {items:['triangle','square','circle','pentagon'], odd:'circle', why:'Circle has no straight edges/vertices.'},
+  {items:['run','jump','swim','sleep'], odd:'sleep', why:'Sleep is passive; the others are active movements.'},
+  {items:['sonnet','haiku','novel','limerick'], odd:'novel', why:'A novel is prose; the rest are poem forms.'},
+  {items:['CPU','RAM','SSD','HTTP'], odd:'HTTP', why:'HTTP is a protocol; the others are hardware.'},
+  {items:['euro','yen','peso','tokyo'], odd:'tokyo', why:'Tokyo is a city; the rest are currencies.'},
+  {items:['femur','tibia','bicep','ulna'], odd:'bicep', why:'Bicep is a muscle; the others are bones.'},
+  {items:['CTR','CPC','ROAS','SQL'], odd:'SQL', why:'SQL is a query language; the rest are marketing metrics.'},
+  {items:['whale','dolphin','shark','seal'], odd:'shark', why:'Shark is a fish; the rest are mammals.'},
+  {items:['diesel','petrol','solar','kerosene'], odd:'solar', why:'Solar is renewable; the others are fossil fuels.'}
+];
+const ANALOGIES = [
+  {q:'Bird is to Nest as Bee is to ?', a:'Hive', opts:['Hive','Flower','Honey','Swarm'], why:'A nest is where a bird lives; a hive is where a bee lives.'},
+  {q:'Book is to Chapter as Symphony is to ?', a:'Movement', opts:['Movement','Note','Orchestra','Conductor'], why:'A chapter is a major section of a book; a movement is a major section of a symphony.'},
+  {q:'Doctor is to Stethoscope as Painter is to ?', a:'Brush', opts:['Brush','Canvas','Gallery','Color'], why:'The relationship is professional-to-primary-tool.'},
+  {q:'Drought is to Rain as Famine is to ?', a:'Food', opts:['Food','Hunger','Crops','Water'], why:'Drought is lack of rain; famine is lack of food.'},
+  {q:'Caterpillar is to Butterfly as Tadpole is to ?', a:'Frog', opts:['Frog','Fish','Pond','Newt'], why:'Both are juvenile-to-adult transformations.'},
+  {q:'Keyboard is to Type as Mouse is to ?', a:'Click', opts:['Click','Scroll','Point','Drag'], why:'Primary action association: keyboards type, mice click.'},
+  {q:'Optimist is to Hope as Cynic is to ?', a:'Doubt', opts:['Doubt','Anger','Truth','Fear'], why:'The defining attitude of each mindset.'},
+  {q:'Sculptor is to Marble as Blacksmith is to ?', a:'Iron', opts:['Iron','Hammer','Forge','Fire'], why:'Artisan-to-raw-material relationship (hammer is a tool, not material).'},
+  {q:'Thermometer is to Temperature as Barometer is to ?', a:'Pressure', opts:['Pressure','Weather','Altitude','Humidity'], why:'Instrument-to-quantity-measured.'},
+  {q:'Verdict is to Jury as Diagnosis is to ?', a:'Doctor', opts:['Doctor','Patient','Disease','Hospital'], why:'The judgment each professional body delivers.'},
+  {q:'Impression is to CPM as Click is to ?', a:'CPC', opts:['CPC','CTR','CPA','ROAS'], why:'CPM prices impressions; CPC prices clicks.'},
+  {q:'Row is to Table as Element is to ?', a:'List', opts:['List','Column','Cell','Array index'], why:'A row is one record of a table; an element is one item of a list.'}
+];
+const STROOP_COLORS = [['RED','#e5455f'],['BLUE','#2d7ff0'],['GREEN','#1fae63'],['YELLOW','#d9a400'],['PURPLE','#8a5cf6'],['ORANGE','#e8781a']];
+const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const PLACES = ['museum','harbor cafe','bookstore','railway station','botanical garden','cinema hall','flea market','rooftop restaurant'];
+const CHESS_PIECES = ['♞','♜','♝','♛','♚','♟'];
+const MISSIONS = [
+  'Score 80+ on any single challenge',
+  'Complete the session without skipping anything',
+  'Get a perfect score on one memory challenge',
+  'Beat your average math speed',
+  'Finish the full session in one sitting — no app switching'
+];
+
+/* ================= SESSION ENGINE ================= */
+let session = null;
+
+const CHALLENGE_POOL = [
+  chWordSpan, chDigitSpan, chGridFlash, chSymbolSeq, chNameFace,
+  chShoppingList, chMathSprint, chStroop, chNumberSeries,
+  chOddOneOut, chAnalogy, chReaction, chCalendar, chCoding,
+  chChessRecall, chCountStream, chStoryRecall, chVisualSearch,
+  chDualNBack, chTaskSwitch, chMentalRotation, chGoNoGo,
+  chPathMemory, chSimonSound, chAnagram, chDotEstimate,
+  chHanoi, chWhack, chSpeedSort, chMatrix, chBlitz, chPairs
+];
+const CHALLENGE_BY_NAME = Object.fromEntries(CHALLENGE_POOL.map(f=>[f.name,f]));
+const SESSION_KEY = 'neuroforge_session';
+
+function persistSession(){
+  if(!session) return;
+  try{
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+      names: session.queue.map(f=>f.name), idx: session.idx, scores: session.scores,
+      vault: session.vault, mission: session.mission, missionDone: session.missionDone,
+      startedAt: session.startedAt, xpEarned: session.xpEarned, perfects: session.perfects,
+      day: todayStr()
+    }));
+  }catch(e){}
+}
+function clearPersistedSession(){ try{ localStorage.removeItem(SESSION_KEY); }catch(e){} }
+function loadPersistedSession(){
+  try{
+    const raw = localStorage.getItem(SESSION_KEY); if(!raw) return null;
+    const obj = JSON.parse(raw);
+    if(obj.day !== todayStr()) { clearPersistedSession(); return null; }
+    const queue = obj.names.map(n=>CHALLENGE_BY_NAME[n]).filter(Boolean);
+    if(queue.length !== obj.names.length || obj.idx >= queue.length) { clearPersistedSession(); return null; }
+    return {queue, idx:obj.idx, scores:obj.scores, vault:obj.vault, mission:obj.mission,
+      missionDone:obj.missionDone, startedAt:obj.startedAt, xpEarned:obj.xpEarned, perfects:obj.perfects};
+  }catch(e){ return null; }
+}
+
+function newSession(){
+  const pool = shuffle(CHALLENGE_POOL.slice());
+  // 13 varied challenges per session + vault memorize (start) + vault recall (end)
+  const picks = pool.slice(0,13);
+  session = {
+    queue: picks, idx:0,
+    scores:{memory:[], visual:[], focus:[], calc:[], reasoning:[], reaction:[], flexibility:[]},
+    vault:null, mission: pick(MISSIONS), missionDone:false,
+    startedAt: Date.now(), xpEarned:0, perfects:0
+  };
+  persistSession();
+}
+
+function addScore(cat, score, xpBase){
+  score = clamp(score,0,1);
+  session.scores[cat].push(score);
+  const xp = Math.round(xpBase*score);
+  session.xpEarned += xp; S.xp += xp; S.coins += Math.round(xp/5);
+  if(score>=0.999) session.perfects++;
+  if(score>=0.8) session.missionDone = true;
+  save();
+  persistSession();
+  toast('+'+xp+' XP');
+}
+
+function nextChallenge(){
+  persistSession();
+  const total = session.queue.length;
+  if(session.idx >= total){ return vaultRecall(); }
+  const fn = session.queue[session.idx];
+  session.idx++;
+  persistSession();
+  fn(session.idx, total);
+}
+
+function challengeHeader(n, total, title, skillName){
+  return `<h3>Challenge ${n} of ${total} · ${skillName}</h3><h2>${title}</h2>`;
+}
+function continueBtn(){
+  return `<div class="center mt"><button class="btn" onclick="nextChallenge()">Next Challenge →</button></div>`;
+}
+function showFeedback(container, good, msg){
+  const fb = container.querySelector('.feedback');
+  fb.className = 'feedback ' + (good?'good':'bad');
+  fb.innerHTML = msg + continueBtn();
+}
+
+/* ================= START / INTRO ================= */
+function resumeSession(){
+  const r = loadPersistedSession();
+  if(!r){ startBreathing(); return; }
+  session = r;
+  if(session.idx >= session.queue.length){ vaultRecall(); } else { nextChallenge(); }
+}
+function intro(){
+  const t = todayStr();
+  const played = S.lastPlayed === t;
+  const resumable = loadPersistedSession();
+  const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+  if(S.lastPlayed && S.lastPlayed !== t && S.lastPlayed !== yesterday && S.streak>0){
+    S.streak = 0; save();
+  }
+  const hist = S.history.slice(-14);
+  let chart = '';
+  if(hist.length){
+    chart = '<h3>Brain Score — last '+hist.length+' sessions</h3><div class="chart">' +
+      hist.map(h=>`<div class="bar" style="height:${Math.max(4,h.brain)}%"><span>${h.brain}</span></div>`).join('') + '</div>';
+  }
+  let weekly = '';
+  if(S.history.length>=5){
+    const cats=['memory','visual','focus','calc','reasoning','reaction','flexibility'];
+    const avgs = cats.map(c=>{
+      const vals = S.history.slice(-7).map(h=>h.cats[c]).filter(v=>v!=null);
+      return [c, vals.length? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length) : null];
+    }).filter(x=>x[1]!=null);
+    if(avgs.length){
+      avgs.sort((a,b)=>a[1]-b[1]);
+      weekly = `<p>📊 <b>Weekly analysis:</b> strongest skill — <b style="color:var(--good)">${avgs[avgs.length-1][0]} (${avgs[avgs.length-1][1]})</b>, weakest — <b style="color:var(--bad)">${avgs[0][0]} (${avgs[0][1]})</b>. Today's session weights extra practice toward your weak spot.</p>`;
+    }
+  }
+  screen(`
+    <div class="card">
+      <h1>⚡ Welcome back${S.sessionsPlayed? '' : ' to NeuroForge'}, Player</h1>
+      <p class="big">${played? 'You already trained today — a bonus session still earns XP (streak unchanged).' : 'Day '+(S.streak+1)+' of your streak. One session a day keeps the doomscroll away.'}</p>
+      <div class="statgrid">
+        <div class="stat"><div class="v">🔥 ${S.streak}</div><div class="l">Day Streak</div></div>
+        <div class="stat"><div class="v">${S.bests.brain||'—'}</div><div class="l">Best Brain Score</div></div>
+        <div class="stat"><div class="v">${S.sessionsPlayed}</div><div class="l">Sessions</div></div>
+        <div class="stat"><div class="v">${S.achievements.length}</div><div class="l">Achievements</div></div>
+      </div>
+      ${weekly}
+      ${chart}
+      ${resumable? `<div class="card center" style="background:var(--soft); box-shadow:none; border-style:dashed;">
+        <p class="big">⏸️ You have an unfinished session — challenge ${resumable.idx+1} of ${resumable.queue.length}.</p>
+        <button class="btn" onclick="resumeSession()">▶ Resume Session</button>
+        <button class="btn secondary small" onclick="clearPersistedSession(); startBreathing();">Start fresh instead</button>
+      </div>` : `<div class="center mt"><button class="btn" onclick="startBreathing()">▶ Start Today's Session</button>
+      <button class="btn secondary" onclick="detoxScreen()">🧘 Digital Detox Mission</button></div>`}
+    </div>
+    ${S.achievements.length? '<div class="card"><h3>Trophy Case</h3>'+S.achievements.map(a=>'<span class="badge">'+esc(a)+'</span>').join('')+'</div>':''}
+  `);
+}
+
+/* ================= BREATHING WARM-UP ================= */
+function startBreathing(){
+  newSession();
+  screen(`
+    <div class="card center">
+      <h2>🫁 30-Second Focus Warm-up</h2>
+      <p>Breathe with the circle. In as it grows, out as it shrinks. This calms your nervous system and primes attention.</p>
+      <div class="breath">breathe</div>
+      <p id="breathCount" class="big">30</p>
+    </div>`);
+  let left = 30;
+  const iv = startInterval(()=>{
+    left--; const el=document.getElementById('breathCount');
+    if(el) el.textContent = left;
+    if(left<=0){ clearInterval(iv); vaultMemorize(); }
+  },1000);
+}
+
+/* ================= VAULT (DELAYED RECALL) ================= */
+function vaultMemorize(){
+  const len = 4 + Math.floor(S.skill.memory/3);
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  let code=''; for(let i=0;i<len;i++) code += chars[rnd(chars.length)];
+  session.vault = code;
+  screen(`
+    <div class="card">
+      <h3>🔐 The Vault · Delayed Recall</h3>
+      <h2>Memorize this vault code</h2>
+      <p>I'll ask for it at the <b>end of the session</b> (~25 min from now). Technique: <b>chunk it</b> — break it into pairs and turn each pair into an image or word.</p>
+      <div class="memoryDisplay">${code}</div>
+      <p>Mission of the day: <b style="color:var(--gold)">${esc(session.mission)}</b></p>
+      <div class="center mt"><button class="btn" onclick="nextChallenge()">I've locked it in →</button></div>
+    </div>`);
+}
+
+function vaultRecall(){
+  screen(`
+    <div class="card">
+      <h3>🔐 The Vault · Delayed Recall</h3>
+      <h2>What was the vault code?</h2>
+      <p>Shown at the start of your session. Type it exactly.</p>
+      <input type="text" id="vaultIn" autocomplete="off" autocapitalize="characters">
+      <div class="center mt"><button class="btn" onclick="checkVault()">Unlock</button></div>
+      <div class="feedback"></div>
+    </div>`);
+  document.getElementById('vaultIn').focus();
+}
+function checkVault(){
+  const guess = document.getElementById('vaultIn').value.toUpperCase().replace(/\s/g,'');
+  const code = session.vault;
+  let correct = 0;
+  for(let i=0;i<code.length;i++){ if(guess[i]===code[i]) correct++; }
+  const score = correct/code.length;
+  addScore('memory', score, 150);
+  adaptSkill('memory');
+  const c = app.querySelector('.card');
+  const fb = c.querySelector('.feedback');
+  fb.className = 'feedback ' + (score>=0.8?'good':'bad');
+  fb.innerHTML = (score>=0.999 ? '🎉 Perfect delayed recall! That is the hardest memory skill there is.'
+    : `The code was <b>${code}</b> — you got ${correct}/${code.length} characters. Delayed recall strengthens fastest when you <b>re-visualize the chunks once mid-session</b>. Try a silent rehearsal halfway through tomorrow.`)
+    + `<div class="center mt"><button class="btn" onclick="results()">See Results 🏁</button></div>`;
+}
+
+/* ================= ADAPTIVE DIFFICULTY ================= */
+function adaptSkill(cat){
+  const arr = session.scores[cat];
+  if(!arr.length) return;
+  const last = arr[arr.length-1];
+  if(last>=0.85) S.skill[cat] = clamp(S.skill[cat]+1, 1, 12);
+  else if(last<0.4) S.skill[cat] = clamp(S.skill[cat]-1, 1, 12);
+  save();
+}
+
+/* ================= CHALLENGES ================= */
+/* --- Word Span --- */
+function chWordSpan(n,total){
+  const count = 5 + Math.floor(S.skill.memory/2);
+  const words = sample(WORDS, count);
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Word Span — remember in order','Memory')}
+    <p>Study the words. Link them into one absurd story — vivid images beat repetition.</p>
+    <div class="memoryDisplay">${words.join(' · ')}</div>
+    <div class="timerbar"><div></div></div>
+    <div id="answerZone"></div>
+    <div class="feedback"></div>
+  </div>`);
+  const studyTime = Math.max(10, count*2.2);
+  countdownBar(c.querySelector('.timerbar'), studyTime, ()=>{
+    c.querySelector('.memoryDisplay').textContent = '● ● ●';
+    c.querySelector('#answerZone').innerHTML = `
+      <p class="mt">Type the words <b>in order</b>, separated by spaces or commas:</p>
+      <input type="text" id="wsIn" autocomplete="off">
+      <div class="center mt"><button class="btn" id="wsBtn">Submit</button></div>`;
+    document.getElementById('wsIn').focus();
+    document.getElementById('wsBtn').onclick = ()=>{
+      const ans = norm(document.getElementById('wsIn').value).split(/[\s,]+/).filter(Boolean);
+      let pts = 0;
+      words.forEach((w,i)=>{
+        if(ans[i]===w) pts += 1;
+        else if(ans.includes(w)) pts += 0.5;
+      });
+      const score = pts/words.length;
+      addScore('memory', score, 100); adaptSkill('memory');
+      showFeedback(c, score>=0.7, `You scored ${Math.round(score*100)}%. The list was: <b>${words.join(', ')}</b>.` +
+        (score>=0.7 ? ' Strong ordering — your story-linking is working.' :
+        ' Order errors usually mean weak links between images. Make each object physically interact with the next (the lantern <i>melts onto</i> the velvet).'));
+    };
+  });
+}
+
+/* --- Digit Span (forward/backward) --- */
+function chDigitSpan(n,total){
+  const backward = Math.random()<0.45;
+  const len = (backward?4:5) + Math.floor(S.skill.memory/2);
+  let digits=''; for(let i=0;i<len;i++) digits += rnd(10);
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total, backward?'Backward Digit Span':'Digit Span','Memory')}
+    <p>${backward? 'Memorize, then type the digits in REVERSE order. This trains working-memory manipulation, not just storage.' : 'Memorize the digits, then type them in order. Chunk into groups of 3.'}</p>
+    <div class="memoryDisplay">${digits.split('').join(' ')}</div>
+    <div class="timerbar"><div></div></div>
+    <div id="answerZone"></div>
+    <div class="feedback"></div>
+  </div>`);
+  countdownBar(c.querySelector('.timerbar'), Math.max(6,len*1.2), ()=>{
+    c.querySelector('.memoryDisplay').textContent='● ● ●';
+    c.querySelector('#answerZone').innerHTML = `
+      <p class="mt">Enter the digits ${backward?'<b>backwards</b>':''}:</p>
+      <input type="text" id="dsIn" inputmode="numeric" autocomplete="off">
+      <div class="center mt"><button class="btn" id="dsBtn">Submit</button></div>`;
+    document.getElementById('dsIn').focus();
+    document.getElementById('dsBtn').onclick = ()=>{
+      const target = backward? digits.split('').reverse().join('') : digits;
+      const ans = document.getElementById('dsIn').value.replace(/\D/g,'');
+      let correct=0; for(let i=0;i<target.length;i++) if(ans[i]===target[i]) correct++;
+      const score = correct/target.length;
+      addScore('memory', score, 90); adaptSkill('memory');
+      showFeedback(c, score>=0.7, `Answer: <b>${target}</b> — you matched ${correct}/${target.length}.` +
+        (backward? ' For backward spans, visualize digits on a mental whiteboard and read them right-to-left.' : ' Group digits like a phone number — the brain holds 3–4 chunks, not 9 digits.'));
+    };
+  });
+}
+
+/* --- Grid Flash (visual memory) --- */
+function chGridFlash(n,total){
+  const size = clamp(3 + Math.floor(S.skill.visual/4), 3, 5);
+  const litCount = clamp(3 + Math.floor(S.skill.visual/2), 3, Math.floor(size*size*0.6));
+  const lit = new Set(); while(lit.size<litCount) lit.add(rnd(size*size));
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Pattern Flash — visual memory','Visual')}
+    <p>${litCount} cells will light up for a few seconds. Memorize their positions as a <b>shape</b>, not as separate dots.</p>
+    <div class="grid" style="${gridCols(size)}">
+      ${Array.from({length:size*size},(_,i)=>`<div class="cell${lit.has(i)?' lit':''}" data-i="${i}"></div>`).join('')}
+    </div>
+    <div class="timerbar"><div></div></div>
+    <p class="center" id="gridMsg">Memorizing…</p>
+    <div class="feedback"></div>
+  </div>`);
+  countdownBar(c.querySelector('.timerbar'), 3+litCount*0.6, ()=>{
+    c.querySelectorAll('.cell').forEach(el=>el.classList.remove('lit'));
+    document.getElementById('gridMsg').innerHTML = `Click the ${litCount} cells that were lit, then <button class="btn small" id="gridBtn">Check</button>`;
+    const picked = new Set();
+    c.querySelectorAll('.cell').forEach(el=>{
+      el.onclick = ()=>{
+        const i=+el.dataset.i;
+        if(picked.has(i)){ picked.delete(i); el.classList.remove('picked'); }
+        else { picked.add(i); el.classList.add('picked'); }
+      };
+    });
+    document.getElementById('gridBtn').onclick = ()=>{
+      let hits=0;
+      c.querySelectorAll('.cell').forEach(el=>{
+        const i=+el.dataset.i; el.onclick=null;
+        if(lit.has(i)){ el.classList.add(picked.has(i)?'hit':'miss'); if(picked.has(i)) hits++; }
+        else if(picked.has(i)){ el.classList.add('miss'); }
+      });
+      const falsePicks = [...picked].filter(i=>!lit.has(i)).length;
+      const score = clamp((hits - falsePicks*0.5)/litCount, 0, 1);
+      addScore('visual', score, 100); adaptSkill('visual');
+      showFeedback(c, score>=0.7, `${hits}/${litCount} correct, ${falsePicks} false picks.` +
+        (score>=0.7? ' Nice spatial encoding.' : ' Try naming the shape the dots make ("an L plus a dot top-right") — verbal labels double visual retention.'));
+    };
+  });
+}
+
+/* --- Symbol Sequence --- */
+function chSymbolSeq(n,total){
+  const len = clamp(4 + Math.floor(S.skill.visual/3), 4, 9);
+  const pal = sample(SYMBOLS, Math.min(8, len+3));
+  const seq = Array.from({length:len}, ()=>pick(pal));
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Symbol Sequence','Visual')}
+    <p>Memorize the order of these symbols, then rebuild the sequence from the palette.</p>
+    <div class="symbolRow">${seq.join('')}</div>
+    <div class="timerbar"><div></div></div>
+    <div id="answerZone"></div>
+    <div class="feedback"></div>
+  </div>`);
+  countdownBar(c.querySelector('.timerbar'), 4+len, ()=>{
+    c.querySelector('.symbolRow').textContent='● ● ●';
+    const built=[];
+    c.querySelector('#answerZone').innerHTML = `
+      <div class="seqBuild" id="seqBuild">&nbsp;</div>
+      <div class="palette">${pal.map(s=>`<button data-s="${s}">${s}</button>`).join('')}</div>
+      <div class="center mt"><button class="btn secondary small" id="seqUndo">Undo</button> <button class="btn small" id="seqOk">Submit</button></div>`;
+    const bd = document.getElementById('seqBuild');
+    c.querySelectorAll('.palette button').forEach(b=>{
+      b.onclick=()=>{ if(built.length<len){ built.push(b.dataset.s); bd.textContent = built.join(''); } };
+    });
+    document.getElementById('seqUndo').onclick=()=>{ built.pop(); bd.textContent = built.join('') || ' '; };
+    document.getElementById('seqOk').onclick=()=>{
+      let correct=0; seq.forEach((s,i)=>{ if(built[i]===s) correct++; });
+      const score = correct/len;
+      addScore('visual', score, 90); adaptSkill('visual');
+      showFeedback(c, score>=0.7, `Sequence was <span style="font-size:22px">${seq.join(' ')}</span> — ${correct}/${len} right.` +
+        (score>=0.7? '' : ' Assign each symbol a sound or word and chant the sequence — audio loops outlast visual ones.'));
+    };
+  });
+}
+
+/* --- Name & Face --- */
+function chNameFace(n,total){
+  const pairs = sample(FACES, clamp(3+Math.floor(S.skill.memory/3),3,6)).map(f=>({f, name:null}));
+  const names = sample(NAMES, pairs.length);
+  pairs.forEach((p,i)=>p.name = names[i]);
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Names & Faces','Memory')}
+    <p>Meet these people. Technique: exaggerate one feature and rhyme it with the name ("Meera has a mirror smile").</p>
+    <div class="center">${pairs.map(p=>`<div class="facecard"><div class="face">${p.f}</div><div class="nm">${p.name}</div></div>`).join('')}</div>
+    <div class="timerbar"><div></div></div>
+    <div id="answerZone"></div>
+    <div class="feedback"></div>
+  </div>`);
+  countdownBar(c.querySelector('.timerbar'), 5+pairs.length*3, ()=>{
+    const quiz = shuffle(pairs);
+    let qi=0, correct=0;
+    const zone = c.querySelector('#answerZone');
+    c.querySelector('.center').innerHTML='';
+    function ask(){
+      if(qi>=quiz.length){
+        const score=correct/quiz.length;
+        addScore('memory', score, 110); adaptSkill('memory');
+        showFeedback(c, score>=0.7, `${correct}/${quiz.length} names recalled.` +
+          (score>=0.7? ' Excellent — this is the single most useful real-world memory skill.' : ' Next time say the name aloud twice while looking at the face — dual encoding (sight + sound) is the fix.'));
+        return;
+      }
+      const p = quiz[qi];
+      const opts = shuffle([p.name, ...sample(NAMES.filter(x=>x!==p.name),3)]);
+      zone.innerHTML = `<div class="center"><div class="face" style="font-size:56px">${p.f}</div><p class="big">Who is this? (${qi+1}/${quiz.length})</p></div>
+        <div class="choices">${opts.map(o=>`<button class="choice" data-n="${o}">${o}</button>`).join('')}</div>`;
+      zone.querySelectorAll('.choice').forEach(b=>{
+        b.onclick=()=>{
+          const right = b.dataset.n===p.name;
+          if(right){ correct++; b.classList.add('correct'); } else { b.classList.add('wrong');
+            zone.querySelectorAll('.choice').forEach(x=>{ if(x.dataset.n===p.name) x.classList.add('correct'); }); }
+          zone.querySelectorAll('.choice').forEach(x=>x.onclick=null);
+          setTimeout(()=>{ qi++; ask(); }, 800);
+        };
+      });
+    }
+    ask();
+  });
+}
+
+/* --- Shopping List (free recall) --- */
+function chShoppingList(n,total){
+  const count = clamp(5+Math.floor(S.skill.memory/2), 5, 12);
+  const items = sample(SHOP, count);
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Shopping List — free recall','Memory')}
+    <p>Use the <b>Method of Loci</b>: place each item at a spot along a familiar route through your home. Front door → hallway → kitchen…</p>
+    <div class="memoryDisplay" style="font-size:19px">${items.join(' · ')}</div>
+    <div class="timerbar"><div></div></div>
+    <div id="answerZone"></div>
+    <div class="feedback"></div>
+  </div>`);
+  countdownBar(c.querySelector('.timerbar'), count*2.5, ()=>{
+    c.querySelector('.memoryDisplay').textContent='● ● ●';
+    c.querySelector('#answerZone').innerHTML = `
+      <p class="mt">Type every item you remember (any order, comma separated):</p>
+      <input type="text" id="slIn" autocomplete="off">
+      <div class="center mt"><button class="btn" id="slBtn">Submit</button></div>`;
+    document.getElementById('slIn').focus();
+    document.getElementById('slBtn').onclick=()=>{
+      const ans = norm(document.getElementById('slIn').value).split(/,+/).map(s=>s.trim()).filter(Boolean);
+      const hits = items.filter(it=>ans.some(a=>a===norm(it)));
+      const score = hits.length/items.length;
+      addScore('memory', score, 100); adaptSkill('memory');
+      const missed = items.filter(it=>!hits.includes(it));
+      showFeedback(c, score>=0.7, `${hits.length}/${items.length} recalled.` +
+        (missed.length? ` Missed: <b>${missed.join(', ')}</b>. Walk your route again — the skipped items are the loci you rushed past.`:' Flawless walk through your memory palace! 🏛️'));
+    };
+  });
+}
+
+/* --- Math Sprint --- */
+function chMathSprint(n,total){
+  const dur = 60;
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Math Sprint — 60 seconds','Calculation')}
+    <p>Answer as many as you can. Speed AND accuracy count. Press Enter to submit.</p>
+    <div class="timerbar"><div></div></div>
+    <div class="bigNum" id="mq">…</div>
+    <input type="text" id="mIn" inputmode="decimal" autocomplete="off" placeholder="answer">
+    <div class="center mt"><button class="btn" id="mBtn">Submit ✓</button></div>
+    <p class="center mt" id="mStats">0 correct · 0 wrong</p>
+    <div class="feedback"></div>
+  </div>`);
+  const lvl = S.skill.calc;
+  let correct=0, wrong=0, cur=null, active=true;
+  function gen(){
+    const kind = rnd(lvl>=5?6:4);
+    let a,b,q,ans;
+    if(kind===0){ a=rnd(40*lvl)+10; b=rnd(40*lvl)+10; q=`${a} + ${b}`; ans=a+b; }
+    else if(kind===1){ a=rnd(50*lvl)+30; b=rnd(a-9)+5; q=`${a} − ${b}`; ans=a-b; }
+    else if(kind===2){ a=rnd(9+lvl)+3; b=rnd(9+Math.floor(lvl/2))+3; q=`${a} × ${b}`; ans=a*b; }
+    else if(kind===3){ b=rnd(9)+3; ans=rnd(11+lvl)+2; a=b*ans; q=`${a} ÷ ${b}`; }
+    else if(kind===4){ const ps=[10,20,25,50,5,15]; const p=pick(ps); a=(rnd(30)+2)*20; q=`${p}% of ${a}`; ans=a*p/100; }
+    else { a=rnd(12+lvl)+4; q=`${a}²`; ans=a*a; }
+    cur={q,ans};
+    document.getElementById('mq').textContent = q + ' = ?';
+    const inp=document.getElementById('mIn'); inp.value=''; inp.focus();
+  }
+  function submitAnswer(){
+    if(!active) return;
+    const inp = document.getElementById('mIn');
+    const v = parseFloat(inp.value);
+    if(!isNaN(v) && v===cur.ans) correct++; else wrong++;
+    document.getElementById('mStats').textContent = `${correct} correct · ${wrong} wrong`;
+    gen();
+  }
+  document.getElementById('mBtn').onclick = submitAnswer;
+  document.getElementById('mIn').addEventListener('keydown', e=>{
+    if(e.key==='Enter') submitAnswer();
+  });
+  gen();
+  countdownBar(c.querySelector('.timerbar'), dur, ()=>{
+    active=false;
+    document.getElementById('mq').textContent='⏱ Time!';
+    const attempts = correct+wrong;
+    const acc = attempts? correct/attempts : 0;
+    const target = 6 + lvl*1.5;
+    const score = clamp((correct/target)*0.7 + acc*0.3, 0, 1);
+    addScore('calc', score, 120); adaptSkill('calc');
+    if(correct > (S.bests.mathSprint||0)){ S.bests.mathSprint = correct; save(); toast('🏆 New math sprint best: '+correct); }
+    showFeedback(c, score>=0.6, `${correct} correct in 60s (accuracy ${Math.round(acc*100)}%).` +
+      (acc<0.8? ' Slow down 10% — wrong answers cost more than slow ones.' : ' Solid. For × problems, split: 17×6 = (17×3)×2 = 51×2 = 102.'));
+  });
+}
+
+/* --- Stroop --- */
+function chStroop(n,total){
+  const dur=40;
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Stroop Test — name the INK color','Focus')}
+    <p>Click the <b>color of the ink</b>, NOT the word. Your brain will fight you — that fight is the workout.</p>
+    <div class="timerbar"><div></div></div>
+    <div class="stroopWord" id="stWord">READY</div>
+    <div class="choices" id="stChoices"></div>
+    <p class="center" id="stStats">0 correct · 0 wrong</p>
+    <div class="feedback"></div>
+  </div>`);
+  let correct=0, wrong=0, cur=null, active=true;
+  function gen(){
+    const word = pick(STROOP_COLORS);
+    let ink = pick(STROOP_COLORS);
+    if(Math.random()<0.75){ while(ink[0]===word[0]) ink = pick(STROOP_COLORS); }
+    cur = ink;
+    const w = document.getElementById('stWord');
+    w.textContent = word[0]; w.style.color = ink[1];
+    const opts = shuffle([ink, ...sample(STROOP_COLORS.filter(x=>x[0]!==ink[0]),3)]);
+    document.getElementById('stChoices').innerHTML = opts.map(o=>`<button class="choice" data-c="${o[0]}">${o[0]}</button>`).join('');
+    document.getElementById('stChoices').querySelectorAll('.choice').forEach(b=>{
+      b.onclick=()=>{ if(!active) return;
+        if(b.dataset.c===cur[0]) correct++; else wrong++;
+        document.getElementById('stStats').textContent = `${correct} correct · ${wrong} wrong`;
+        gen();
+      };
+    });
+  }
+  gen();
+  countdownBar(c.querySelector('.timerbar'), dur, ()=>{
+    active=false;
+    const attempts=correct+wrong, acc = attempts? correct/attempts:0;
+    const target = 12 + S.skill.focus*1.5;
+    const score = clamp((correct/target)*0.6 + acc*0.4, 0, 1);
+    addScore('focus', score, 110); adaptSkill('focus');
+    showFeedback(c, score>=0.6, `${correct} correct, ${wrong} wrong in ${dur}s.` +
+      (acc<0.85? ' Blur your eyes slightly so the word is harder to read — it weakens the interference.' : ' Great inhibition control — this directly trains resisting distraction.'));
+  });
+}
+
+/* --- Number Series --- */
+function chNumberSeries(n,total){
+  const lvl = S.skill.reasoning;
+  const gens = [
+    ()=>{ const s=rnd(9)+2, d=rnd(6)+3; const seq=[s,s+d,s+2*d,s+3*d]; return {seq, ans:s+4*d, why:`Add ${d} each step.`}; },
+    ()=>{ const s=rnd(4)+2, r=rnd(2)+2; const seq=[s,s*r,s*r*r,s*r*r*r]; return {seq, ans:s*r**4, why:`Multiply by ${r} each step.`}; },
+    ()=>{ const s=rnd(5)+1; const seq=[s*s,(s+1)**2,(s+2)**2,(s+3)**2]; return {seq, ans:(s+4)**2, why:'Consecutive perfect squares.'}; },
+    ()=>{ let a=rnd(4)+1,b=a+rnd(3)+1; const seq=[a,b,a+b,a+2*b]; const s5=(a+b)+(a+2*b); return {seq, ans:s5, why:'Each term is the sum of the previous two (Fibonacci-style).'}; },
+    ()=>{ const s=rnd(8)+3, d=rnd(4)+2; const seq=[s, s+d, s+d*3, s+d*6]; return {seq, ans:s+d*10, why:`Gaps grow: +${d}, +${d*2}, +${d*3}, +${d*4}.`}; },
+    ()=>{ const s=rnd(6)+2; const seq=[s, s*2, s*2-3, (s*2-3)*2]; return {seq, ans:(s*2-3)*2-3, why:'Alternating rule: ×2, then −3, repeating.'}; }
+  ];
+  const g = gens[rnd(lvl>=5? gens.length : 4)]();
+  const opts = shuffle([g.ans, g.ans+rnd(5)+1, g.ans-rnd(4)-1, g.ans + (rnd(2)? 10 : -7)]);
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Number Series','Reasoning')}
+    <p class="big center">What comes next?</p>
+    <div class="bigNum">${g.seq.join(', ')}, ?</div>
+    <div class="choices">${opts.map(o=>`<button class="choice" data-v="${o}">${o}</button>`).join('')}</div>
+    <div class="feedback"></div>
+  </div>`);
+  const t0 = Date.now();
+  c.querySelectorAll('.choice').forEach(b=>{
+    b.onclick=()=>{
+      const right = +b.dataset.v === g.ans;
+      b.classList.add(right?'correct':'wrong');
+      if(!right) c.querySelectorAll('.choice').forEach(x=>{ if(+x.dataset.v===g.ans) x.classList.add('correct'); });
+      c.querySelectorAll('.choice').forEach(x=>x.onclick=null);
+      const secs=(Date.now()-t0)/1000;
+      const score = right? clamp(1 - Math.max(0,secs-12)/40, 0.4, 1) : 0;
+      addScore('reasoning', score, 80); adaptSkill('reasoning');
+      showFeedback(c, right, (right?'✅ Correct. ':'❌ Not quite. ') + `Rule: <b>${g.why}</b>` +
+        (right?'':' Always test differences first, then ratios, then alternating rules.'));
+    };
+  });
+}
+
+/* --- Odd One Out --- */
+function chOddOneOut(n,total){
+  const set = pick(ODD_SETS);
+  const opts = shuffle(set.items);
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Odd One Out','Reasoning')}
+    <p class="big center">Which one doesn't belong?</p>
+    <div class="choices">${opts.map(o=>`<button class="choice" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>
+    <div class="feedback"></div>
+  </div>`);
+  c.querySelectorAll('.choice').forEach(b=>{
+    b.onclick=()=>{
+      const right = b.dataset.v===set.odd;
+      b.classList.add(right?'correct':'wrong');
+      if(!right) c.querySelectorAll('.choice').forEach(x=>{ if(x.dataset.v===set.odd) x.classList.add('correct'); });
+      c.querySelectorAll('.choice').forEach(x=>x.onclick=null);
+      addScore('reasoning', right?1:0, 60); adaptSkill('reasoning');
+      showFeedback(c, right, (right?'✅ ':'❌ ') + esc(set.why));
+    };
+  });
+}
+
+/* --- Analogy --- */
+function chAnalogy(n,total){
+  const a = pick(ANALOGIES);
+  const opts = shuffle(a.opts);
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Analogy','Reasoning')}
+    <p class="big center">${esc(a.q)}</p>
+    <div class="choices">${opts.map(o=>`<button class="choice" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>
+    <div class="feedback"></div>
+  </div>`);
+  c.querySelectorAll('.choice').forEach(b=>{
+    b.onclick=()=>{
+      const right = b.dataset.v===a.a;
+      b.classList.add(right?'correct':'wrong');
+      if(!right) c.querySelectorAll('.choice').forEach(x=>{ if(x.dataset.v===a.a) x.classList.add('correct'); });
+      c.querySelectorAll('.choice').forEach(x=>x.onclick=null);
+      addScore('reasoning', right?1:0, 60); adaptSkill('reasoning');
+      showFeedback(c, right, (right?'✅ ':'❌ ') + esc(a.why));
+    };
+  });
+}
+
+/* --- Reaction Test --- */
+function chReaction(n,total){
+  const trials = 5;
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Reaction Test','Reaction')}
+    <p>Click the box the INSTANT it turns green. ${trials} rounds. Clicking early costs you.</p>
+    <div class="reactZone" id="rz">Click to start</div>
+    <p class="center" id="rzStats"></p>
+    <div class="feedback"></div>
+  </div>`);
+  const rz = document.getElementById('rz');
+  let times=[], early=0, t0=0, state='idle', timer=null;
+  function arm(){
+    state='wait'; rz.className='reactZone wait'; rz.textContent='Wait for green…';
+    timer = setTimeout(()=>{ state='go'; rz.className='reactZone go'; rz.textContent='CLICK!'; t0=performance.now(); }, 900+rnd(2200));
+  }
+  rz.onclick=()=>{
+    if(state==='idle'){ arm(); return; }
+    if(state==='wait'){ clearTimeout(timer); early++; rz.className='reactZone'; rz.textContent='Too early! Click to retry'; state='idle'; return; }
+    if(state==='go'){
+      const ms = Math.round(performance.now()-t0);
+      times.push(ms);
+      document.getElementById('rzStats').textContent = times.map(t=>t+'ms').join(' · ');
+      if(times.length<trials){ state='idle'; rz.className='reactZone'; rz.textContent='Click for round '+(times.length+1); }
+      else {
+        state='done'; rz.className='reactZone'; rz.onclick=null;
+        const avg = Math.round(times.reduce((a,b)=>a+b,0)/times.length);
+        rz.textContent = 'Average: '+avg+'ms';
+        let score = clamp((550-avg)/300, 0, 1) - early*0.08;
+        score = clamp(score,0,1);
+        addScore('reaction', score, 80); adaptSkill('reaction');
+        if(!S.bests.reaction || avg < S.bests.reaction){ S.bests.reaction=avg; save(); toast('🏆 New reaction best: '+avg+'ms'); }
+        showFeedback(c, score>=0.5, `Average ${avg}ms with ${early} early clicks. ` +
+          (avg<=300? 'Elite territory.' : 'Focus on the box\'s edges, relax your hand, and exhale — tension slows reaction by ~30ms.'));
+      }
+    }
+  };
+}
+
+/* --- Calendar Calculation --- */
+function chCalendar(n,total){
+  const startIdx = rnd(7);
+  const jump = 8 + rnd(20 + S.skill.calc*4);
+  const ans = DAYS[(startIdx + jump) % 7];
+  const wrong = sample(DAYS.filter(d=>d!==ans), 3);
+  const opts = shuffle([ans, ...wrong]);
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Calendar Calculation','Calculation')}
+    <p class="big center">If today is <b>${DAYS[startIdx]}</b>, what day of the week will it be in <b>${jump} days</b>?</p>
+    <div class="choices">${opts.map(o=>`<button class="choice" data-v="${o}">${o}</button>`).join('')}</div>
+    <div class="feedback"></div>
+  </div>`);
+  const t0=Date.now();
+  c.querySelectorAll('.choice').forEach(b=>{
+    b.onclick=()=>{
+      const right = b.dataset.v===ans;
+      b.classList.add(right?'correct':'wrong');
+      if(!right) c.querySelectorAll('.choice').forEach(x=>{ if(x.dataset.v===ans) x.classList.add('correct'); });
+      c.querySelectorAll('.choice').forEach(x=>x.onclick=null);
+      const secs=(Date.now()-t0)/1000;
+      const score = right? clamp(1 - Math.max(0,secs-15)/40, 0.4, 1) : 0;
+      addScore('calc', score, 70); adaptSkill('calc');
+      showFeedback(c, right, (right?'✅ ':'❌ ') + `Trick: ${jump} mod 7 = <b>${jump%7}</b>, so just count ${jump%7} day${jump%7===1?'':'s'} forward from ${DAYS[startIdx]} → <b>${ans}</b>. Weeks vanish — only the remainder matters.`);
+    };
+  });
+}
+
+/* --- Coding–Decoding (cipher) --- */
+function chCoding(n,total){
+  const shift = 1 + rnd(Math.min(3, 1+Math.floor(S.skill.reasoning/4)));
+  const cand = WORDS.filter(w=>w.length>=4 && w.length<=6 && /^[a-z]+$/.test(w));
+  const [w1, w2] = sample(cand, 2);
+  const encode = w => w.toUpperCase().split('').map(ch=>String.fromCharCode((ch.charCodeAt(0)-65+shift)%26+65)).join('');
+  const e1 = encode(w1), e2 = encode(w2);
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Coding–Decoding','Reasoning')}
+    <p class="big center">In a secret code, <b>${w1.toUpperCase()}</b> is written as <b>${e1}</b>.<br>How is <b>${w2.toUpperCase()}</b> written in the same code?</p>
+    <input type="text" id="cdIn" autocomplete="off" autocapitalize="characters">
+    <div class="center mt"><button class="btn" id="cdBtn">Submit</button></div>
+    <div class="feedback"></div>
+  </div>`);
+  document.getElementById('cdIn').focus();
+  document.getElementById('cdBtn').onclick=()=>{
+    const guess = document.getElementById('cdIn').value.toUpperCase().replace(/[^A-Z]/g,'');
+    let correct=0; for(let i=0;i<e2.length;i++) if(guess[i]===e2[i]) correct++;
+    const score = correct/e2.length;
+    addScore('reasoning', score, 90); adaptSkill('reasoning');
+    showFeedback(c, score>=0.8, `Answer: <b>${e2}</b> (${correct}/${e2.length} letters). Each letter shifts forward by <b>${shift}</b> in the alphabet (${w1[0].toUpperCase()}→${e1[0]}). Always compare the first letters of the pair to find the shift.`);
+  };
+}
+
+/* --- Chess Position Recall --- */
+function chChessRecall(n,total){
+  const size = 4;
+  const count = clamp(3 + Math.floor(S.skill.visual/3), 3, 6);
+  const pieces = sample(CHESS_PIECES, count);
+  const cellsIdx = sample(Array.from({length:size*size},(_,i)=>i), count);
+  const posOf = {}; pieces.forEach((p,i)=>posOf[p]=cellsIdx[i]);
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Board Recall — where was each piece?','Visual')}
+    <p>Memorize where each piece sits. Give each piece a job at its location ("the knight guards the corner").</p>
+    <div class="grid" style="${gridCols(size)}">
+      ${Array.from({length:size*size},(_,i)=>{
+        const p = pieces.find(x=>posOf[x]===i);
+        return `<div class="cell" data-i="${i}" style="font-size:34px; display:flex; align-items:center; justify-content:center;">${p||''}</div>`;
+      }).join('')}
+    </div>
+    <div class="timerbar"><div></div></div>
+    <p class="center" id="bMsg">Memorizing…</p>
+    <div class="feedback"></div>
+  </div>`);
+  countdownBar(c.querySelector('.timerbar'), 4+count*2, ()=>{
+    c.querySelectorAll('.cell').forEach(el=>el.textContent='');
+    const order = shuffle(pieces.slice());
+    let qi=0, hits=0;
+    const msg = document.getElementById('bMsg');
+    function ask(){
+      if(qi>=order.length){
+        const score=hits/order.length;
+        addScore('visual', score, 110); adaptSkill('visual');
+        c.querySelectorAll('.cell').forEach(el=>{ el.onclick=null;
+          const p=pieces.find(x=>posOf[x]===+el.dataset.i); if(p){ el.textContent=p; el.classList.add('hit'); } });
+        showFeedback(c, score>=0.7, `${hits}/${order.length} pieces placed correctly.` +
+          (score>=0.7? ' This is exactly how chess masters memorize boards — by meaning, not location.' : ' Group pieces into a mini-story across the board; isolated positions fade in seconds.'));
+        return;
+      }
+      msg.innerHTML = `Click the square where <span style="font-size:30px">${order[qi]}</span> was (${qi+1}/${order.length})`;
+      c.querySelectorAll('.cell').forEach(el=>{
+        el.onclick=()=>{
+          if(+el.dataset.i === posOf[order[qi]]){ hits++; el.classList.add('hit'); }
+          else el.classList.add('miss');
+          c.querySelectorAll('.cell').forEach(x=>x.onclick=null);
+          setTimeout(()=>{ c.querySelectorAll('.cell').forEach(x=>x.classList.remove('hit','miss')); qi++; ask(); }, 600);
+        };
+      });
+    }
+    ask();
+  });
+}
+
+/* --- Attention Stream (count targets) --- */
+function chCountStream(n,total){
+  const len = clamp(12 + S.skill.focus*2, 12, 30);
+  const symbols = sample(SYMBOLS, 4);
+  const target = symbols[0];
+  const stream = Array.from({length:len}, ()=>pick(symbols));
+  const trueCount = stream.filter(s=>s===target).length;
+  const speed = clamp(950 - S.skill.focus*40, 550, 950);
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Attention Stream','Focus')}
+    <p class="big center">Symbols will flash one by one. Count how many times <span style="font-size:28px">${target}</span> appears. Don't count anything else.</p>
+    <div class="symbolRow" id="csFlash" style="font-size:64px; letter-spacing:0;">3</div>
+    <div id="answerZone"></div>
+    <div class="feedback"></div>
+  </div>`);
+  const fl = document.getElementById('csFlash');
+  let pre = 3;
+  const preIv = startInterval(()=>{
+    pre--; if(pre>0){ fl.textContent=pre; return; }
+    clearInterval(preIv);
+    let i=0;
+    const iv = startInterval(()=>{
+      if(i<stream.length){ fl.textContent = stream[i]; i++; return; }
+      clearInterval(iv); fl.textContent='—';
+      c.querySelector('#answerZone').innerHTML = `
+        <p class="mt center">How many <span style="font-size:24px">${target}</span> did you see?</p>
+        <input type="text" id="csIn" inputmode="numeric" autocomplete="off">
+        <div class="center mt"><button class="btn" id="csBtn">Submit</button></div>`;
+      document.getElementById('csIn').focus();
+      document.getElementById('csBtn').onclick=()=>{
+        const g = parseInt(document.getElementById('csIn').value,10);
+        const diff = Math.abs(g-trueCount);
+        const score = isNaN(diff)? 0 : diff===0? 1 : diff===1? 0.5 : 0;
+        addScore('focus', score, 90); adaptSkill('focus');
+        showFeedback(c, score>=0.5, `There were <b>${trueCount}</b> — you said ${isNaN(g)?'nothing':g}.` +
+          (score===1? ' Perfect sustained attention.' : ' Tap a finger for every hit — anchoring the count in your body stops the mind from drifting.'));
+      };
+    }, speed);
+  }, 800);
+}
+
+/* --- Story Recall --- */
+function chStoryRecall(n,total){
+  const [n1,n2] = sample(NAMES,2);
+  const place = pick(PLACES), day = pick(DAYS);
+  const hour = 2+rnd(9);
+  const item = pick(SHOP);
+  const price = (rnd(46)+5)*10;
+  const meetIn = rnd(9)+2;
+  const story = `${n1} met ${n2} at the ${place} on ${day} at ${hour} o'clock. They bought ${item} for ₹${price}, and agreed to meet again in ${meetIn} days.`;
+  const qs = shuffle([
+    {q:'Where did they meet?', a:place, opts:shuffle([place, ...sample(PLACES.filter(p=>p!==place),3)])},
+    {q:'How much did they pay?', a:'₹'+price, opts:shuffle(['₹'+price, '₹'+(price+10), '₹'+(price-20), '₹'+(price+50)])},
+    {q:'Who did '+n1+' meet?', a:n2, opts:shuffle([n2, ...sample(NAMES.filter(x=>x!==n1&&x!==n2),3)])},
+    {q:'On which day did they meet?', a:day, opts:shuffle([day, ...sample(DAYS.filter(d=>d!==day),3)])}
+  ]).slice(0,3);
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Story Recall','Memory')}
+    <p>Read once, slowly. See it as a movie scene — names, numbers and places stick when they're images, not words.</p>
+    <div class="memoryDisplay" style="font-size:18px; font-weight:500; letter-spacing:0;">${story}</div>
+    <div class="timerbar"><div></div></div>
+    <div id="answerZone"></div>
+    <div class="feedback"></div>
+  </div>`);
+  countdownBar(c.querySelector('.timerbar'), 16, ()=>{
+    c.querySelector('.memoryDisplay').textContent='● ● ●';
+    let qi=0, hits=0;
+    const zone = c.querySelector('#answerZone');
+    function ask(){
+      if(qi>=qs.length){
+        const score=hits/qs.length;
+        addScore('memory', score, 100); adaptSkill('memory');
+        showFeedback(c, score>=0.66, `${hits}/${qs.length} details recalled. The story: <i>${story}</i>` +
+          (score>=0.66? '' : '<br>Numbers slip first — convert them to images (₹'+price+' → picture '+(price/10)+' coins).'));
+        return;
+      }
+      const q = qs[qi];
+      zone.innerHTML = `<p class="big mt center">${q.q} (${qi+1}/${qs.length})</p>
+        <div class="choices">${q.opts.map(o=>`<button class="choice" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>`;
+      zone.querySelectorAll('.choice').forEach(b=>{
+        b.onclick=()=>{
+          const right = b.dataset.v===q.a;
+          if(right){ hits++; b.classList.add('correct'); }
+          else { b.classList.add('wrong'); zone.querySelectorAll('.choice').forEach(x=>{ if(x.dataset.v===q.a) x.classList.add('correct'); }); }
+          zone.querySelectorAll('.choice').forEach(x=>x.onclick=null);
+          setTimeout(()=>{ qi++; ask(); }, 800);
+        };
+      });
+    }
+    ask();
+  });
+}
+
+/* --- Visual Search --- */
+function chVisualSearch(n,total){
+  const gridN = 42;
+  const symbols = sample(SYMBOLS, 5);
+  const target = symbols[0];
+  const trueCount = 4 + rnd(6);
+  const field = [];
+  for(let i=0;i<trueCount;i++) field.push(target);
+  while(field.length<gridN) field.push(pick(symbols.slice(1)));
+  const shuffled = shuffle(field);
+  const timeLimit = clamp(22 - S.skill.focus, 10, 22);
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Visual Search — count the targets','Focus')}
+    <p class="big center">Count every <span style="font-size:26px">${target}</span> before time runs out. Scan in rows like reading — random scanning double-counts.</p>
+    <div class="timerbar"><div></div></div>
+    <div class="memoryDisplay" id="vsField" style="font-size:28px; letter-spacing:8px; line-height:1.9;">${shuffled.join('')}</div>
+    <input type="text" id="vsIn" inputmode="numeric" autocomplete="off" placeholder="how many?">
+    <div class="center mt"><button class="btn" id="vsBtn">Submit</button></div>
+    <div class="feedback"></div>
+  </div>`);
+  let answered = false;
+  const stop = countdownBar(c.querySelector('.timerbar'), timeLimit, ()=>{ if(!answered) finish(); });
+  function finish(){
+    if(answered) return; answered = true; stop();
+    document.getElementById('vsField').style.filter='blur(6px)';
+    const g = parseInt(document.getElementById('vsIn').value,10);
+    const diff = Math.abs(g-trueCount);
+    const score = isNaN(diff)? 0 : diff===0? 1 : diff===1? 0.5 : 0;
+    addScore('focus', score, 80); adaptSkill('focus');
+    showFeedback(c, score>=0.5, `There were <b>${trueCount}</b> targets — you said ${isNaN(g)?'nothing':g}.` +
+      (score===1? ' Sharp eyes.' : ' Chunk the field into quadrants and total them — it prevents both misses and double counts.'));
+  }
+  document.getElementById('vsBtn').onclick = finish;
+  document.getElementById('vsIn').addEventListener('keydown', e=>{ if(e.key==='Enter') finish(); });
+}
+
+/* --- Dual N-Back (working memory gold standard) --- */
+function chDualNBack(n,total){
+  const nb = S.skill.memory>=8? 3 : S.skill.memory>=4? 2 : 1;
+  const trialsN = 14;
+  const letters = ['A','K','M','R','T','S'];
+  // build sequence with ~35% forced matches
+  const seq = [];
+  for(let i=0;i<trialsN;i++){
+    let pos = rnd(9), let_ = pick(letters);
+    if(i>=nb){
+      if(Math.random()<0.35) pos = seq[i-nb].pos;
+      if(Math.random()<0.35) let_ = seq[i-nb].let;
+    }
+    seq.push({pos, let:let_});
+  }
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Dual '+nb+'-Back — the working memory king','Memory')}
+    <p>A square lights up AND a letter appears, every 2.5s. Press <b>📍 Position</b> if the position matches the one from <b>${nb} step${nb>1?'s':''} ago</b>, and <b>🔤 Letter</b> if the letter matches. Both can match. This is the most researched brain-training task in existence.</p>
+    <div class="grid" style="${gridCols(3)}">
+      ${Array.from({length:9},(_,i)=>`<div class="cell" data-i="${i}"></div>`).join('')}
+    </div>
+    <div class="bigNum" id="nbLetter" style="font-size:38px; min-height:52px;">—</div>
+    <div class="nbButtons">
+      <button class="nbBtn" id="nbPos">📍 Position match</button>
+      <button class="nbBtn" id="nbLet">🔤 Letter match</button>
+    </div>
+    <p class="center" id="nbMsg">Get ready…</p>
+    <div class="feedback"></div>
+  </div>`);
+  let i=-1, results_=[], cur={pos:false, let:false};
+  const posBtn=document.getElementById('nbPos'), letBtn=document.getElementById('nbLet');
+  posBtn.onclick=()=>{ cur.pos=true; posBtn.classList.add('armed'); };
+  letBtn.onclick=()=>{ cur.let=true; letBtn.classList.add('armed'); };
+  const iv = startInterval(()=>{
+    // score previous trial
+    if(i>=nb){
+      const truth = {pos: seq[i].pos===seq[i-nb].pos, let: seq[i].let===seq[i-nb].let};
+      results_.push({saidPos:cur.pos, saidLet:cur.let, isPos:truth.pos, isLet:truth.let});
+    }
+    cur={pos:false, let:false}; posBtn.classList.remove('armed'); letBtn.classList.remove('armed');
+    i++;
+    c.querySelectorAll('.cell').forEach(el=>el.classList.remove('lit'));
+    if(i>=trialsN){
+      clearInterval(iv);
+      document.getElementById('nbLetter').textContent='✓';
+      document.getElementById('nbMsg').textContent='Done!';
+      posBtn.disabled=true; letBtn.disabled=true;
+      let hits=0, misses=0, fa=0, matches=0;
+      results_.forEach(r=>{
+        if(r.isPos){ matches++; r.saidPos? hits++ : misses++; } else if(r.saidPos) fa++;
+        if(r.isLet){ matches++; r.saidLet? hits++ : misses++; } else if(r.saidLet) fa++;
+      });
+      const score = matches? clamp((hits - fa*0.5)/matches, 0, 1) : 0.5;
+      addScore('memory', score, 140); adaptSkill('memory');
+      showFeedback(c, score>=0.6, `${hits} hits, ${misses} missed matches, ${fa} false alarms.` +
+        (score>=0.6? ' Dual n-back at this level is genuinely hard — strong performance.' :
+        ' Don\'t rehearse verbally — hold a "feeling" of the last '+nb+' positions like afterimages. It clicks after a few sessions.'));
+      return;
+    }
+    document.getElementById('nbMsg').textContent = 'Trial '+(i+1)+' / '+trialsN;
+    c.querySelector(`.cell[data-i="${seq[i].pos}"]`).classList.add('lit');
+    document.getElementById('nbLetter').textContent = seq[i].let;
+  }, 2500);
+}
+
+/* --- Task Switching (cognitive flexibility) --- */
+function chTaskSwitch(n,total){
+  const dur = 45;
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Rule Switch','Flexibility')}
+    <p>The rule changes constantly. <b>NUMBER rule:</b> is the digit higher or lower than 5? <b>COLOR rule:</b> is it blue or orange? Answer the RULE shown, not the habit.</p>
+    <div class="timerbar"><div></div></div>
+    <p class="center big" id="tsRule" style="font-weight:800">—</p>
+    <div class="bigNum" id="tsDigit">—</div>
+    <div class="choices" id="tsChoices"></div>
+    <p class="center" id="tsStats">0 correct · 0 wrong</p>
+    <div class="feedback"></div>
+  </div>`);
+  let correct=0, wrong=0, active=true, cur=null;
+  function gen(){
+    const rule = Math.random()<0.5? 'NUMBER':'COLOR';
+    let d = rnd(9)+1; if(d===5) d = 6;
+    const isBlue = Math.random()<0.5;
+    cur = {rule, d, isBlue};
+    document.getElementById('tsRule').textContent = '🔁 Rule: '+rule;
+    document.getElementById('tsRule').style.color = rule==='NUMBER'? 'var(--accent)':'var(--gold)';
+    const dg = document.getElementById('tsDigit');
+    dg.textContent = d; dg.style.color = isBlue? '#2d7ff0' : '#e8781a';
+    const opts = rule==='NUMBER'? [['HIGH (>5)','H'],['LOW (<5)','L']] : [['BLUE','B'],['ORANGE','O']];
+    document.getElementById('tsChoices').innerHTML = opts.map(o=>`<button class="choice" data-v="${o[1]}">${o[0]}</button>`).join('');
+    document.getElementById('tsChoices').querySelectorAll('.choice').forEach(b=>{
+      b.onclick=()=>{ if(!active) return;
+        const ans = cur.rule==='NUMBER'? (cur.d>5?'H':'L') : (cur.isBlue?'B':'O');
+        if(b.dataset.v===ans) correct++; else wrong++;
+        document.getElementById('tsStats').textContent = `${correct} correct · ${wrong} wrong`;
+        gen();
+      };
+    });
+  }
+  gen();
+  countdownBar(c.querySelector('.timerbar'), dur, ()=>{
+    active=false;
+    const attempts=correct+wrong, acc=attempts? correct/attempts:0;
+    const target = 14 + S.skill.flexibility*1.5;
+    const score = clamp((correct/target)*0.6 + acc*0.4, 0, 1);
+    addScore('flexibility', score, 110); adaptSkill('flexibility');
+    showFeedback(c, score>=0.6, `${correct} correct, ${wrong} wrong in ${dur}s.` +
+      (acc<0.85? ' Pause a beat when the rule flips — the error spike right after a switch is the "switch cost" you\'re training away.' :
+      ' Low switch cost — this is the same circuit that resists app-switching and doomscroll pulls.'));
+  });
+}
+
+/* --- Mental Rotation --- */
+function chMentalRotation(n,total){
+  const SHAPES = [
+    [[0,0],[1,0],[2,0],[2,1]],           // L
+    [[0,1],[0,2],[1,0],[1,1]],           // S
+    [[0,0],[1,0],[1,1],[2,1],[2,2]],     // W-ish
+    [[0,0],[0,1],[1,0],[2,0],[2,1]],     // C/P
+    [[0,0],[1,0],[1,1],[1,2],[2,2]]      // Z-long
+  ];
+  function normalize(cells){
+    const minR=Math.min(...cells.map(c=>c[0])), minC=Math.min(...cells.map(c=>c[1]));
+    return cells.map(c=>[c[0]-minR, c[1]-minC]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
+  }
+  function rot(cells){ const maxR=Math.max(...cells.map(c=>c[0])); return normalize(cells.map(([r,c])=>[c, maxR-r])); }
+  function mirror(cells){ const maxC=Math.max(...cells.map(c=>c[1])); return normalize(cells.map(([r,c])=>[r, maxC-c])); }
+  function rotN(cells,k){ let x=normalize(cells); for(let i=0;i<k;i++) x=rot(x); return x; }
+  function draw(cells){
+    const rows = Math.max(...cells.map(c=>c[0]))+1, cols = Math.max(...cells.map(c=>c[1]))+1;
+    const has = new Set(cells.map(c=>c[0]+','+c[1]));
+    let h = `<div class="miniGrid" style="grid-template-columns:repeat(${cols},22px)">`;
+    for(let r=0;r<rows;r++) for(let cc=0;cc<cols;cc++) h += `<div class="mini${has.has(r+','+cc)?' on':''}"></div>`;
+    return h+'</div>';
+  }
+  const base = normalize(pick(SHAPES));
+  const correctOpt = rotN(base, 1+rnd(3));
+  const m = mirror(base);
+  const distractors = [rotN(m,1+rnd(3)), rotN(m,rnd(4)), rotN(m, (1+rnd(3)))];
+  const opts = shuffle([{cells:correctOpt, ok:true}, ...distractors.map(dc=>({cells:dc, ok:false}))]);
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Mental Rotation','Visual')}
+    <p class="big center">Which option is the SAME shape as the target, just rotated? (The others are mirror images.)</p>
+    <div class="center"><div class="shapeOpt" style="cursor:default; border-color:var(--accent)">${draw(base)}<p style="margin:6px 0 0">TARGET</p></div></div>
+    <div class="center mt">${opts.map((o,i)=>`<div class="shapeOpt" data-i="${i}">${draw(o.cells)}</div>`).join('')}</div>
+    <div class="feedback"></div>
+  </div>`);
+  const t0=Date.now();
+  c.querySelectorAll('.shapeOpt[data-i]').forEach(el=>{
+    el.onclick=()=>{
+      const o = opts[+el.dataset.i];
+      el.classList.add(o.ok?'correct':'wrong');
+      if(!o.ok) c.querySelectorAll('.shapeOpt[data-i]').forEach(x=>{ if(opts[+x.dataset.i].ok) x.classList.add('correct'); });
+      c.querySelectorAll('.shapeOpt[data-i]').forEach(x=>x.onclick=null);
+      const secs=(Date.now()-t0)/1000;
+      const score = o.ok? clamp(1-Math.max(0,secs-15)/40, 0.4, 1) : 0;
+      addScore('visual', score, 90); adaptSkill('visual');
+      showFeedback(c, o.ok, (o.ok?'✅ Correct — you rotated it in your head, which lights up the same parietal circuits as physical rotation.':'❌ That was a mirror image.') +
+        ' Trick: track ONE distinctive corner of the shape and follow where it should land after rotation.');
+    };
+  });
+}
+
+/* --- Go / No-Go (impulse control) --- */
+function chGoNoGo(n,total){
+  const trialsN = clamp(18 + S.skill.focus*2, 18, 34);
+  const symbols = sample(SYMBOLS, 4);
+  const forbidden = symbols[0];
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Go / No-Go — impulse control','Focus')}
+    <p class="big center">TAP the box when any symbol appears — EXCEPT <span style="font-size:28px">${forbidden}</span>. See it? Freeze. This trains the exact brake your brain uses to resist opening Instagram.</p>
+    <div class="goZone" id="gz">Click to start</div>
+    <p class="center" id="gzStats"></p>
+    <div class="feedback"></div>
+  </div>`);
+  const gz = document.getElementById('gz');
+  let started=false, i=0, hits=0, misses=0, fa=0, responded=false, isNoGo=false, iv=null;
+  const speed = clamp(1000 - S.skill.focus*35, 620, 1000);
+  gz.onclick=()=>{
+    if(!started){
+      started=true; gz.textContent='';
+      iv = startInterval(()=>{
+        if(i>0){ // score previous
+          if(isNoGo){ if(responded) fa++; }
+          else { if(responded) hits++; else misses++; }
+        }
+        if(i>=trialsN){
+          clearInterval(iv); gz.onclick=null; gz.textContent='Done';
+          const goTrials = trialsN - Math.round(trialsN*0.3);
+          const score = clamp((hits/(hits+misses||1))*0.5 + (1 - fa/Math.max(1,Math.round(trialsN*0.3)))*0.5, 0, 1);
+          addScore('focus', score, 110); adaptSkill('focus');
+          document.getElementById('gzStats').textContent='';
+          showFeedback(c, score>=0.7, `${hits} correct taps, ${misses} missed, <b>${fa} failed stops</b>.` +
+            (fa>1? ' Failed stops matter most — next time, hover your finger instead of resting it; the micro-delay gives your brake time to fire.' :
+            ' Excellent inhibition. This skill transfers directly to resisting notifications.'));
+          return;
+        }
+        responded=false;
+        isNoGo = Math.random()<0.3;
+        gz.textContent = isNoGo? forbidden : pick(symbols.slice(1));
+        i++;
+      }, speed);
+      return;
+    }
+    responded = true;
+  };
+}
+
+/* --- Path Memory (spatial sequence) --- */
+function chPathMemory(n,total){
+  const size = 4;
+  const len = clamp(4 + Math.floor(S.skill.visual/2), 4, 10);
+  const path = [];
+  let cell = rnd(size*size);
+  for(let i=0;i<len;i++){
+    path.push(cell);
+    const r = Math.floor(cell/size), cc = cell%size;
+    const moves = [];
+    if(r>0) moves.push(cell-size); if(r<size-1) moves.push(cell+size);
+    if(cc>0) moves.push(cell-1); if(cc<size-1) moves.push(cell+1);
+    const next = moves.filter(m=>!path.includes(m));
+    cell = next.length? pick(next) : pick(moves);
+  }
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Path Memory — walk it back','Visual')}
+    <p>Watch the route light up step by step, then retrace it by clicking the cells <b>in the same order</b>. Your hippocampus maps routes exactly like this in the real world.</p>
+    <div class="grid" style="${gridCols(size)}">
+      ${Array.from({length:size*size},(_,i)=>`<div class="cell" data-i="${i}"></div>`).join('')}
+    </div>
+    <p class="center" id="pmMsg">Watch…</p>
+    <div class="feedback"></div>
+  </div>`);
+  let step=0;
+  const showIv = startInterval(()=>{
+    c.querySelectorAll('.cell').forEach(el=>el.classList.remove('lit'));
+    if(step>=path.length){
+      clearInterval(showIv);
+      document.getElementById('pmMsg').textContent = 'Now retrace the path ('+len+' steps)';
+      let clickIdx=0, hits=0;
+      c.querySelectorAll('.cell').forEach(el=>{
+        el.onclick=()=>{
+          const ok = +el.dataset.i === path[clickIdx];
+          el.classList.add(ok?'hit':'miss');
+          if(ok) hits++;
+          setTimeout(()=>el.classList.remove('hit','miss'), 350);
+          clickIdx++;
+          if(clickIdx>=len){
+            c.querySelectorAll('.cell').forEach(x=>x.onclick=null);
+            const score = hits/len;
+            addScore('visual', score, 110); adaptSkill('visual');
+            showFeedback(c, score>=0.7, `${hits}/${len} steps correct.` +
+              (score>=0.7? ' Strong route memory.' : ' Narrate the path as directions ("down, down, right, up") — verbal + spatial dual-coding is how taxi drivers do it.'));
+          }
+        };
+      });
+      return;
+    }
+    c.querySelector(`.cell[data-i="${path[step]}"]`).classList.add('lit');
+    step++;
+  }, 650);
+}
+
+/* --- Simon Sound (audio-visual sequence) --- */
+function chSimonSound(n,total){
+  const len = clamp(4 + Math.floor(S.skill.memory/2), 4, 10);
+  const pads = [
+    {color:'#1fae63', freq:329.6}, {color:'#e5455f', freq:261.6},
+    {color:'#d9a400', freq:392.0}, {color:'#2d7ff0', freq:220.0}
+  ];
+  const seq = Array.from({length:len}, ()=>rnd(4));
+  let audio=null;
+  function beep(f){
+    try{
+      if(!audio) audio = new (window.AudioContext||window.webkitAudioContext)();
+      if(audio.state==='suspended') audio.resume();
+      const o=audio.createOscillator(), g=audio.createGain();
+      o.frequency.value=f; o.type='sine'; o.connect(g); g.connect(audio.destination);
+      g.gain.setValueAtTime(0.18, audio.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audio.currentTime+0.28);
+      o.start(); o.stop(audio.currentTime+0.3);
+    }catch(e){}
+  }
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Echo — sound & color sequence','Memory')}
+    <p>Watch AND listen — each pad has its own tone. Then replay the full sequence. Multisensory encoding (sight + sound) builds stronger memory traces than either alone.</p>
+    <div class="simonPads">${pads.map((p,i)=>`<button class="simonPad" data-i="${i}" style="background:${p.color}"></button>`).join('')}</div>
+    <p class="center" id="smMsg">Press play to hear the sequence</p>
+    <div class="center"><button class="btn small" id="smPlay">▶ Play sequence</button></div>
+    <div class="feedback"></div>
+  </div>`);
+  const padEls = c.querySelectorAll('.simonPad');
+  function flash(i){ padEls[i].classList.add('flash'); beep(pads[i].freq); setTimeout(()=>padEls[i].classList.remove('flash'), 380); }
+  let inputOn=false, idx=0, hits=0, played=false;
+  document.getElementById('smPlay').onclick=function(){
+    if(played) return; played=true; this.disabled=true;
+    let k=0;
+    const iv=startInterval(()=>{
+      if(k>=seq.length){
+        clearInterval(iv); inputOn=true;
+        document.getElementById('smMsg').textContent='Your turn — replay all '+len+' steps';
+        return;
+      }
+      flash(seq[k]); k++;
+    }, 600);
+  };
+  padEls.forEach(el=>{
+    el.onclick=()=>{
+      if(!inputOn) return;
+      const i=+el.dataset.i; flash(i);
+      if(i===seq[idx]) hits++;
+      idx++;
+      if(idx>=len){
+        inputOn=false;
+        const score=hits/len;
+        addScore('memory', score, 100); adaptSkill('memory');
+        showFeedback(c, score>=0.7, `${hits}/${len} steps right.` +
+          (score>=0.7? ' The tones helped, didn\'t they? That\'s multisensory binding at work.' : ' Hum the tone pattern back mentally before clicking — audio memory outlasts visual by seconds.'));
+      }
+    };
+  });
+}
+
+/* --- Anagram Forge --- */
+function chAnagram(n,total){
+  const cand = WORDS.filter(w=>w.length>=6 && w.length<=8);
+  const word = pick(cand);
+  let scr = word;
+  while(scr===word){ scr = shuffle(word.split('')).join(''); }
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Anagram Forge','Reasoning')}
+    <p class="big center">Unscramble this ${word.length}-letter English word:</p>
+    <div class="memoryDisplay" style="letter-spacing:8px">${scr.toUpperCase()}</div>
+    <input type="text" id="agIn" autocomplete="off">
+    <div class="center mt"><button class="btn" id="agBtn">Submit</button> <button class="btn secondary small" id="agHint">Hint (−30%)</button></div>
+    <div class="feedback"></div>
+  </div>`);
+  document.getElementById('agIn').focus();
+  const t0=Date.now(); let hinted=false;
+  document.getElementById('agHint').onclick=function(){
+    hinted=true; this.disabled=true;
+    this.insertAdjacentHTML('afterend', `<p class="mt">Starts with <b>${word[0].toUpperCase()}</b>, ends with <b>${word[word.length-1].toUpperCase()}</b></p>`);
+  };
+  function check(){
+    const g = norm(document.getElementById('agIn').value).replace(/\s/g,'');
+    const right = g===word;
+    const secs=(Date.now()-t0)/1000;
+    let score = right? clamp(1-Math.max(0,secs-25)/60, 0.4, 1) : 0;
+    if(right && hinted) score *= 0.7;
+    addScore('reasoning', score, 80); adaptSkill('reasoning');
+    showFeedback(c, right, (right?'✅ Nailed it: ':'❌ The word was: ') + `<b>${word.toUpperCase()}</b>. ` +
+      'Strategy: pull out common endings first (-ING, -ER, -LE), then anchor rare letters like V, K, W — they have few possible positions.');
+  }
+  document.getElementById('agBtn').onclick=check;
+  document.getElementById('agIn').addEventListener('keydown', e=>{ if(e.key==='Enter') check(); });
+}
+
+/* --- Dot Estimation (numerosity) --- */
+function chDotEstimate(n,total){
+  const count = 25 + rnd(55);
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Dot Flash — estimate the count','Calculation')}
+    <p class="big center">Dots will flash for just over a second. Estimate how many — no time to count, trust your number sense.</p>
+    <div class="dotBox" id="dotBox"></div>
+    <div id="answerZone" class="center"><button class="btn" id="dotGo">Flash the dots</button></div>
+    <div class="feedback"></div>
+  </div>`);
+  document.getElementById('dotGo').onclick=()=>{
+    const box=document.getElementById('dotBox');
+    let h='';
+    for(let i=0;i<count;i++){ h+=`<div class="dot" style="left:${3+rnd(93)}%; top:${3+rnd(90)}%"></div>`; }
+    box.innerHTML=h;
+    document.getElementById('answerZone').innerHTML='<p class="big">…</p>';
+    setTimeout(()=>{
+      box.innerHTML='';
+      document.getElementById('answerZone').innerHTML = `
+        <p class="mt">How many dots?</p>
+        <input type="text" id="dotIn" inputmode="numeric" autocomplete="off">
+        <div class="center mt"><button class="btn" id="dotBtn">Submit</button></div>`;
+      document.getElementById('dotIn').focus();
+      document.getElementById('dotBtn').onclick=()=>{
+        const g=parseInt(document.getElementById('dotIn').value,10);
+        const err = isNaN(g)? 1 : Math.abs(g-count)/count;
+        const score = err<=0.08? 1 : err<=0.15? 0.75 : err<=0.25? 0.5 : err<=0.4? 0.25 : 0;
+        addScore('calc', score, 70); adaptSkill('calc');
+        showFeedback(c, score>=0.5, `There were <b>${count}</b> — you said ${isNaN(g)?'nothing':g} (${Math.round(err*100)}% off).` +
+          ' Pro estimators chunk: mentally grid the box into 4 quadrants, estimate one, multiply. Your approximate number system sharpens with every rep.');
+      };
+    }, 1200);
+  };
+}
+
+/* --- Tower of Hanoi (planning / executive function) --- */
+function chHanoi(n,total){
+  const nDisks = S.skill.reasoning>=6? 4 : 3;
+  const optimal = Math.pow(2,nDisks)-1;
+  const pegs = [Array.from({length:nDisks},(_,i)=>nDisks-i), [], []]; // bottom-first
+  let moves=0, sel=null;
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Tower of Hanoi — plan before you move','Reasoning')}
+    <p>Move the whole tower to the <b>right peg</b>. One disk at a time; never place a bigger disk on a smaller one. Optimal: <b>${optimal} moves</b>. Plan 3 moves ahead — that's the executive-function workout.</p>
+    <div class="pegRow">${[0,1,2].map(i=>`<div class="peg" data-p="${i}"></div>`).join('')}</div>
+    <p class="center" id="hMoves">Moves: 0</p>
+    <div class="feedback"></div>
+  </div>`);
+  const pegEls = c.querySelectorAll('.peg');
+  function render(){
+    pegEls.forEach((el,i)=>{
+      el.innerHTML = pegs[i].map(d=>`<div class="disk" style="width:${30+d*18}%">${d}</div>`).join('');
+      el.classList.toggle('sel', sel===i);
+    });
+    document.getElementById('hMoves').textContent = 'Moves: '+moves;
+  }
+  function win(){
+    pegEls.forEach(el=>el.onclick=null);
+    const ratio = optimal/moves;
+    const score = clamp(ratio, 0.3, 1);
+    addScore('reasoning', score, 130); adaptSkill('reasoning');
+    showFeedback(c, score>=0.75, `Solved in <b>${moves}</b> moves (optimal ${optimal}).` +
+      (moves===optimal? ' PERFECT — pure recursive planning. 🏆' :
+      ' The trick: to move a tower of N, first move the tower of N−1 out of the way. Think in sub-towers, not disks.'));
+  }
+  pegEls.forEach((el)=>{
+    el.onclick=()=>{
+      const i=+el.dataset.p;
+      if(sel===null){ if(pegs[i].length) sel=i; render(); return; }
+      if(sel===i){ sel=null; render(); return; }
+      const disk = pegs[sel][pegs[sel].length-1];
+      const top = pegs[i][pegs[i].length-1];
+      if(top===undefined || disk<top){
+        pegs[i].push(pegs[sel].pop()); moves++; sel=null; render();
+        if(pegs[2].length===nDisks) win();
+      } else { sel=null; render(); toast('❌ Bigger on smaller — not allowed'); }
+    };
+  });
+  render();
+}
+
+/* --- Whack-a-Cell (speed + selective attention) --- */
+function chWhack(n,total){
+  const dur=30, size=3;
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Whack-a-Cell','Reaction')}
+    <p>Tap the <b style="color:var(--accent)">purple</b> cells the instant they light. NEVER tap <b style="color:var(--bad)">red</b> decoys — they cost 2 points. Speed with restraint.</p>
+    <div class="timerbar"><div></div></div>
+    <div class="grid" style="${gridCols(size)}">
+      ${Array.from({length:size*size},(_,i)=>`<div class="cell" data-i="${i}"></div>`).join('')}
+    </div>
+    <p class="center" id="wkStats">Score: 0</p>
+    <div class="feedback"></div>
+  </div>`);
+  const cells = c.querySelectorAll('.cell');
+  let pts=0, targets=0, hits=0, decoyTaps=0, active=true, cur=-1, curDecoy=false;
+  const speed = clamp(900 - S.skill.reaction*40, 550, 900);
+  function lightOne(){
+    if(!active) return;
+    cells.forEach(el=>{ el.classList.remove('lit'); el.style.background=''; });
+    cur = rnd(size*size);
+    curDecoy = Math.random()<0.25;
+    const el = cells[cur];
+    if(curDecoy) el.style.background='var(--bad)';
+    else el.classList.add('lit');
+    if(!curDecoy) targets++;
+  }
+  cells.forEach(el=>{
+    el.onclick=()=>{
+      if(!active || +el.dataset.i!==cur) return;
+      if(curDecoy){ decoyTaps++; pts-=2; }
+      else { hits++; pts++; }
+      document.getElementById('wkStats').textContent='Score: '+pts;
+      cur=-1; el.classList.remove('lit'); el.style.background='';
+    };
+  });
+  const iv = startInterval(lightOne, speed);
+  lightOne();
+  countdownBar(c.querySelector('.timerbar'), dur, ()=>{
+    active=false; clearInterval(iv);
+    cells.forEach(el=>{ el.onclick=null; el.classList.remove('lit'); el.style.background=''; });
+    const score = clamp((hits/Math.max(1,targets))*0.75 + (1-decoyTaps/Math.max(1,targets*0.33))*0.25, 0, 1);
+    addScore('reaction', score, 100); adaptSkill('reaction');
+    showFeedback(c, score>=0.6, `${hits}/${targets} targets whacked, ${decoyTaps} decoys hit, final score ${pts}.` +
+      (decoyTaps>2? ' You\'re chasing speed at the cost of control — half a beat of "check the color" saves more points than fast fingers earn.' : ' Fast AND disciplined.'));
+  });
+}
+
+/* --- Speed Sort (processing speed) --- */
+function chSpeedSort(n,total){
+  const count = clamp(6 + Math.floor(S.skill.reaction/3), 6, 10);
+  let nums = new Set(); while(nums.size<count) nums.add(rnd(90)+10);
+  nums = shuffle([...nums]);
+  const sorted = nums.slice().sort((a,b)=>a-b);
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Speed Sort — tap smallest to largest','Reaction')}
+    <p>Tap the numbers in <b>ascending order</b> as fast as you can. Wrong taps add a penalty.</p>
+    <div class="center" style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:16px 0;">
+      ${nums.map(v=>`<button class="sortBtn" data-v="${v}">${v}</button>`).join('')}
+    </div>
+    <p class="center" id="ssMsg">Go!</p>
+    <div class="feedback"></div>
+  </div>`);
+  let idx=0, errs=0; const t0=Date.now();
+  c.querySelectorAll('.sortBtn').forEach(b=>{
+    b.onclick=()=>{
+      if(+b.dataset.v===sorted[idx]){
+        b.classList.add('gone'); idx++;
+        if(idx>=count){
+          const secs=(Date.now()-t0)/1000;
+          const par = count*1.1 + 1;
+          let score = clamp(1-(secs-par)/(par*1.6), 0, 1) - errs*0.08;
+          score = clamp(score,0,1);
+          addScore('reaction', score, 90); adaptSkill('reaction');
+          showFeedback(c, score>=0.6, `Sorted ${count} numbers in <b>${secs.toFixed(1)}s</b> with ${errs} misses (par ~${par.toFixed(0)}s).` +
+            ' Pro scan: sweep for the smallest 2–3 numbers FIRST, queue them mentally, then tap — batching beats searching one at a time.');
+        }
+      } else { errs++; b.classList.add('err'); setTimeout(()=>b.classList.remove('err'),300); }
+    };
+  });
+}
+
+/* --- Matrix Puzzle (Raven-style inductive reasoning) --- */
+function chMatrix(n,total){
+  const syms = sample(['★','●','▲','◆','♥','✿'],3);
+  const ruleType = rnd(2);
+  // grid[r][c]; rule A: row symbol, count = column+1 ; rule B: col symbol, count = row+1
+  function cellStr(r,cc){
+    const sym = ruleType===0? syms[r] : syms[cc];
+    const k = ruleType===0? cc+1 : r+1;
+    return sym.repeat(k);
+  }
+  const answer = cellStr(2,2);
+  const wrongs = new Set();
+  while(wrongs.size<3){
+    const w = pick(syms).repeat(1+rnd(3));
+    if(w!==answer) wrongs.add(w);
+  }
+  const opts = shuffle([answer, ...wrongs]);
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Matrix Puzzle — find the rule','Reasoning')}
+    <p class="big center">What belongs in the missing cell?</p>
+    <div class="grid" style="grid-template-columns:repeat(3,auto); gap:8px;">
+      ${[0,1,2].map(r=>[0,1,2].map(cc=> (r===2&&cc===2)? `<div class="matCell q">?</div>` : `<div class="matCell">${cellStr(r,cc)}</div>`).join('')).join('')}
+    </div>
+    <div class="choices">${opts.map(o=>`<button class="choice" data-v="${o}">${o}</button>`).join('')}</div>
+    <div class="feedback"></div>
+  </div>`);
+  const t0=Date.now();
+  c.querySelectorAll('.choice').forEach(b=>{
+    b.onclick=()=>{
+      const right = b.dataset.v===answer;
+      b.classList.add(right?'correct':'wrong');
+      if(!right) c.querySelectorAll('.choice').forEach(x=>{ if(x.dataset.v===answer) x.classList.add('correct'); });
+      c.querySelectorAll('.choice').forEach(x=>x.onclick=null);
+      const secs=(Date.now()-t0)/1000;
+      const score = right? clamp(1-Math.max(0,secs-15)/40, 0.4, 1) : 0;
+      addScore('reasoning', score, 90); adaptSkill('reasoning');
+      showFeedback(c, right, (right?'✅ ':'❌ ') + `Rule: ${ruleType===0? 'each ROW keeps one symbol, and the count grows across columns (1→2→3)' : 'each COLUMN keeps one symbol, and the count grows down rows (1→2→3)'} → <b>${answer}</b>. Always scan rows first, then columns, then diagonals.`);
+    };
+  });
+}
+
+/* --- True/False Blitz (decision speed under pressure) --- */
+function chBlitz(n,total){
+  const dur=35;
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'True / False Blitz','Flexibility')}
+    <p>Rapid-fire claims — math, alphabet, logic. Verify each one FAST. The claim types keep switching, so your brain must keep re-loading rules.</p>
+    <div class="timerbar"><div></div></div>
+    <p class="big center" id="bzQ" style="font-size:24px; min-height:64px; font-weight:700;">—</p>
+    <div class="choices">
+      <button class="choice" id="bzT" style="border-color:var(--good)">✔ TRUE</button>
+      <button class="choice" id="bzF" style="border-color:var(--bad)">✘ FALSE</button>
+    </div>
+    <p class="center" id="bzStats">0 correct · 0 wrong</p>
+    <div class="feedback"></div>
+  </div>`);
+  let correct=0, wrong=0, truth=null, active=true;
+  const L='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  function gen(){
+    const kind = rnd(4);
+    let text;
+    truth = Math.random()<0.5;
+    if(kind===0){ const a=rnd(12)+3, b=rnd(12)+3; let r=a*b; if(!truth) r += (rnd(2)?1:-1)*(rnd(4)+1); text=`${a} × ${b} = ${r}`; }
+    else if(kind===1){ const a=rnd(80)+10, b=rnd(80)+10; text = truth? `${Math.max(a,b)} > ${Math.min(a,b)}` : `${Math.min(a,b)} > ${Math.max(a,b)}`; if(a===b){ truth=false; text=`${a} > ${b}`; } }
+    else if(kind===2){ let i=rnd(24), j=i+1+rnd(3); text = truth? `${L[i]} comes before ${L[j]}` : `${L[j]} comes before ${L[i]}`; }
+    else { const w = pick(WORDS); const len = truth? w.length : w.length + (rnd(2)?1:-1); text = `"${w.toUpperCase()}" has ${len} letters`; }
+    document.getElementById('bzQ').textContent = text;
+  }
+  function answer(v){
+    if(!active) return;
+    if(v===truth) correct++; else wrong++;
+    document.getElementById('bzStats').textContent = `${correct} correct · ${wrong} wrong`;
+    gen();
+  }
+  document.getElementById('bzT').onclick=()=>answer(true);
+  document.getElementById('bzF').onclick=()=>answer(false);
+  gen();
+  countdownBar(c.querySelector('.timerbar'), dur, ()=>{
+    active=false;
+    const attempts=correct+wrong, acc=attempts? correct/attempts:0;
+    const target = 12 + S.skill.flexibility*1.5;
+    const score = clamp((correct/target)*0.6 + acc*0.4, 0, 1);
+    addScore('flexibility', score, 100); adaptSkill('flexibility');
+    showFeedback(c, score>=0.6, `${correct} verified correctly, ${wrong} wrong in ${dur}s.` +
+      (acc<0.85? ' When a claim FEELS true, that\'s exactly when to double-check — this game trains you to distrust fluency.' : ' Sharp verification under pressure — great BS-detector training.'));
+  });
+}
+
+/* --- Memory Pairs (concentration) --- */
+function chPairs(n,total){
+  const nPairs = S.skill.memory>=6? 8 : 6;
+  const emo = sample(['🍎','🌙','🚀','🐢','🎈','🔑','🌵','🎲','🐝','⚓','🍄','🎯'], nPairs);
+  const deck = shuffle([...emo, ...emo]);
+  const cols = nPairs>=8? 4 : 4;
+  const c = screen(`<div class="card">
+    ${challengeHeader(n,total,'Memory Pairs','Memory')}
+    <p>Classic concentration: flip two cards, find the pairs. Fewer attempts = higher score. Remember what you saw and WHERE.</p>
+    <div class="grid" style="grid-template-columns:repeat(${cols},auto); gap:8px;">
+      ${deck.map((e,i)=>`<button class="flipCard" data-i="${i}">·</button>`).join('')}
+    </div>
+    <p class="center" id="prStats">Attempts: 0</p>
+    <div class="feedback"></div>
+  </div>`);
+  const cards = c.querySelectorAll('.flipCard');
+  let open=[], attempts=0, found=0, lock=false;
+  cards.forEach(el=>{
+    el.onclick=()=>{
+      if(lock || el.classList.contains('up') || el.classList.contains('done')) return;
+      const i=+el.dataset.i;
+      el.classList.add('up'); el.textContent=deck[i];
+      open.push(i);
+      if(open.length===2){
+        attempts++;
+        document.getElementById('prStats').textContent='Attempts: '+attempts;
+        const [a,b]=open;
+        if(deck[a]===deck[b]){
+          found++;
+          cards[a].classList.add('done'); cards[b].classList.add('done');
+          open=[];
+          if(found===nPairs){
+            cards.forEach(x=>x.onclick=null);
+            const score = clamp((nPairs*1.7)/attempts, 0, 1);
+            addScore('memory', score, 110); adaptSkill('memory');
+            showFeedback(c, score>=0.6, `All ${nPairs} pairs in <b>${attempts}</b> attempts (perfect play ≈ ${Math.round(nPairs*1.5)}).` +
+              ' Strategy: when you flip a new card, silently name its position aloud ("rocket, row 2 left") — spatial + verbal tags cut attempts dramatically.');
+          }
+        } else {
+          lock=true;
+          setTimeout(()=>{
+            cards[a].classList.remove('up'); cards[a].textContent='·';
+            cards[b].classList.remove('up'); cards[b].textContent='·';
+            open=[]; lock=false;
+          }, 750);
+        }
+      }
+    };
+  });
+}
+
+/* ================= RESULTS ================= */
+function results(){
+  clearPersistedSession();
+  const cats = ['memory','visual','focus','calc','reasoning','reaction','flexibility'];
+  const catNames = {memory:'Memory', visual:'Visual Memory', focus:'Focus', calc:'Calculation', reasoning:'Reasoning', reaction:'Reaction', flexibility:'Flexibility'};
+  const catScores = {};
+  cats.forEach(ct=>{
+    const arr = session.scores[ct];
+    catScores[ct] = arr.length? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length*100) : null;
+  });
+  const present = cats.filter(ct=>catScores[ct]!=null);
+  const brain = Math.round(present.reduce((a,ct)=>a+catScores[ct],0)/present.length);
+  const mins = Math.round((Date.now()-session.startedAt)/60000);
+
+  // history + streak
+  const t = todayStr();
+  const prev = S.history.length? S.history[S.history.length-1] : null;
+  const firstToday = S.lastPlayed !== t;
+  if(firstToday){ S.streak += 1; }
+  S.lastPlayed = t; S.sessionsPlayed += 1;
+  S.history.push({date:t, brain, cats:catScores});
+  if(S.history.length>90) S.history = S.history.slice(-90);
+
+  // bests & achievements
+  const newAch = [];
+  function ach(name){ if(!S.achievements.includes(name)){ S.achievements.push(name); newAch.push(name); } }
+  if(!S.bests.brain || brain>S.bests.brain){ S.bests.brain = brain; if(S.sessionsPlayed>1) newAch.push('🏆 New Best Brain Score: '+brain); }
+  if(S.sessionsPlayed===1) ach('🎖 First Steps');
+  if(S.streak>=3) ach('🔥 3-Day Streak');
+  if(S.streak>=7) ach('🔥🔥 7-Day Streak — Focus Champion');
+  if(S.streak>=30) ach('👑 30-Day Streak — Memory Master');
+  if(session.perfects>=1) ach('💎 Perfect Recall');
+  if(catScores.calc!=null && catScores.calc>=90) ach('🧮 Calculation King');
+  if(catScores.focus!=null && catScores.focus>=90) ach('🎯 Focus Champion');
+  if(brain>=90) ach('🧠 Brain Titan Performance');
+  if(session.missionDone){ S.xp += 50; S.coins += 20; }
+  S.focusPoints += 10 + (session.missionDone?5:0);
+  save();
+
+  const delta = prev? brain - prev.brain : null;
+  const weak = present.slice().sort((a,b)=>catScores[a]-catScores[b])[0];
+  const recs = {
+    memory:'Tomorrow, build your memory palace BEFORE the list appears — pre-loading loci is the #1 accelerator.',
+    visual:'Practice "shape naming": describe any pattern aloud in words. Do it with real objects today (a shelf, a parking lot).',
+    focus:'Your Stroop scores rise fastest with single-tasking practice: one 25-minute phone-free block today.',
+    calc:'Drill one times-table family (e.g., 17×) for 3 minutes tonight — targeted drilling beats general practice.',
+    reasoning:'Before answering, verbalize the RULE, not the answer. Rule-first thinking is what improves reasoning scores.',
+    reaction:'Reaction improves with rest — check your sleep tonight; 7+ hours is worth 20ms.',
+    flexibility:'Switching cost shrinks with practice at BOUNDARIES: today, alternate two small tasks in 5-min blocks instead of finishing one then the other.'
+  };
+  const detoxMin = [15,30,45,60,90,120][clamp(Math.floor(S.streak/3),0,5)];
+
+  screen(`
+    <div class="card center">
+      <h3>Session Complete · ${mins} min</h3>
+      <h1>🧠 Brain Score</h1>
+      <div class="bigNum" style="font-size:64px; background:linear-gradient(90deg,var(--accent2),var(--accent)); -webkit-background-clip:text; background-clip:text; color:transparent;">${brain}</div>
+      <p class="big">${delta==null? 'Baseline set — everything from here is growth.' : delta>=0? '▲ +'+delta+' vs last session' : '▼ '+delta+' vs last session (dips are part of training)'}</p>
+      ${session.missionDone? '<span class="badge">✅ Daily Mission Complete +50 XP</span>' : '<span class="pill">Mission missed — new one tomorrow</span>'}
+    </div>
+    <div class="card">
+      <h3>Skill Breakdown</h3>
+      ${present.map(ct=>`<div class="scorebar"><div class="name">${catNames[ct]}</div><div class="track"><div class="fill" style="width:${catScores[ct]}%"></div></div><div class="val">${catScores[ct]}</div></div>`).join('')}
+      <p class="mt">💡 <b>Tomorrow's focus (${catNames[weak]}):</b> ${recs[weak]}</p>
+    </div>
+    ${newAch.length? `<div class="card"><h3>🎉 Unlocked</h3>${newAch.map(a=>'<span class="badge">'+esc(a)+'</span>').join('')}</div>` : ''}
+    <div class="card">
+      <h3>🧘 Anti-Doomscroll Mission</h3>
+      <p class="big">Stay off social media for the next <b style="color:var(--gold)">${detoxMin} minutes</b>. Read, walk, or work deep instead.</p>
+      <p>Run the timer here to earn <b>+${detoxMin} Focus Points</b>. Every scroll you skip is a rep for your attention span.</p>
+      <div class="center"><button class="btn" onclick="startDetox(${detoxMin})">Start ${detoxMin}-min Detox Timer</button>
+      <button class="btn secondary" onclick="intro()">Back to Home</button></div>
+    </div>
+  `);
+}
+
+/* ================= DETOX ================= */
+function detoxScreen(){
+  const detoxMin = [15,30,45,60,90,120][clamp(Math.floor(S.streak/3),0,5)];
+  screen(`<div class="card center">
+    <h2>🧘 Digital Detox</h2>
+    <p class="big">Current level: <b>${detoxMin} minutes</b> away from social media. Completing it earns +${detoxMin} Focus Points. Your level rises with your streak.</p>
+    <p>Focus Points so far: <b>${S.focusPoints}</b></p>
+    <button class="btn" onclick="startDetox(${detoxMin})">Start Timer</button>
+    <button class="btn secondary" onclick="intro()">Back</button>
+  </div>`);
+}
+let detoxIv = null;
+function startDetox(min){
+  if(detoxIv) clearInterval(detoxIv);
+  let left = min*60;
+  screen(`<div class="card center">
+    <h2>🧘 Detox in progress</h2>
+    <div class="bigNum" id="dtTime" style="font-size:56px">--:--</div>
+    <p>Keep this tab open. Go read something, stretch, or just think. If you leave to scroll, restart honestly — you're only training yourself.</p>
+    <button class="btn secondary" onclick="cancelDetox()">Give up (no points)</button>
+  </div>`);
+  function tick(){
+    const m = Math.floor(left/60), s = left%60;
+    const el = document.getElementById('dtTime');
+    if(el) el.textContent = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    if(left<=0){
+      clearInterval(detoxIv); detoxIv=null;
+      S.focusPoints += min; save();
+      screen(`<div class="card center"><h1>🎉 Detox complete!</h1><p class="big">+${min} Focus Points. That's ${min} minutes your attention span got stronger and the algorithm got weaker.</p>
+      <button class="btn" onclick="intro()">Home</button></div>`);
+      return;
+    }
+    left--;
+  }
+  tick();
+  detoxIv = startInterval(tick, 1000);
+}
+function cancelDetox(){ if(detoxIv) clearInterval(detoxIv); detoxIv=null; intro(); }
+
+/* ================= PREFERENCES / ACCESSIBILITY ================= */
+const PREF_DEFAULTS = {theme:'light', size:'normal', sound:true, haptics:true, cb:false, reminder:false, onboarded:false};
+S.prefs = Object.assign({}, PREF_DEFAULTS, S.prefs||{});
+function applyPrefs(){
+  const b = document.body;
+  b.dataset.theme = S.prefs.theme;
+  b.dataset.size = S.prefs.size;
+  b.dataset.cb = S.prefs.cb ? 'on' : 'off';
+  const meta = document.querySelector('meta[name=theme-color]');
+  if(meta) meta.content = S.prefs.theme==='dark' ? '#0c0e1c' : '#f0edff';
+}
+function setPref(k,v){ S.prefs[k]=v; save(); applyPrefs(); }
+
+/* ================= SOUND + HAPTICS ================= */
+let AC=null;
+function sfx(freq, dur=0.06, type='triangle', vol=0.12){
+  if(!S.prefs.sound) return;
+  try{
+    if(!AC) AC = new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==='suspended') AC.resume();
+    const o=AC.createOscillator(), g=AC.createGain();
+    o.type=type; o.frequency.value=freq; o.connect(g); g.connect(AC.destination);
+    g.gain.setValueAtTime(vol, AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, AC.currentTime+dur);
+    o.start(); o.stop(AC.currentTime+dur+0.02);
+  }catch(e){}
+}
+function haptic(ms){ if(S.prefs.haptics && navigator.vibrate){ try{ navigator.vibrate(ms); }catch(e){} } }
+document.addEventListener('pointerdown', (e)=>{
+  const t = e.target.closest('.btn, .choice, .cell, .gearBtn, #nav button, .nbBtn, .sortBtn, .flipCard, .shapeOpt, .simonPad, .peg, .palette button, .tog, .seg button');
+  if(!t) return;
+  const ok = !t.classList.contains('wrong') && !t.classList.contains('err');
+  sfx(ok?560:180, 0.05, ok?'triangle':'sawtooth', 0.09); haptic(ok?8:20);
+}, {passive:true});
+
+/* ================= BOTTOM NAV ================= */
+function setNav(name){
+  document.querySelectorAll('#nav button[data-nav]').forEach(b=>b.classList.toggle('on', b.dataset.nav===name));
+}
+function navGo(name){
+  if(name==='play'){ setNav('home'); startBreathing(); return; }
+  if(name==='home'){ setNav('home'); intro(); }
+  else if(name==='insights'){ setNav('insights'); insightsScreen(); }
+  else if(name==='awards'){ setNav('awards'); achievementsScreen(); }
+  else if(name==='settings'){ setNav('settings'); settingsScreen(); }
+}
+
+/* ================= SETTINGS SCREEN ================= */
+function settingsScreen(){
+  setNav('settings');
+  const p = S.prefs;
+  const tog = (k,label,desc,ic)=>`<div class="setRow"><span class="ric">${ic}</span><span class="lbl"><span class="t">${label}</span><span class="d">${desc}</span></span><span class="tog${p[k]?' on':''}" onclick="setPref('${k}',${!p[k]}); settingsScreen();"></span></div>`;
+  screen(`
+    <div class="card"><h1>⚙️ Settings</h1><p>Make NeuroForge fit you — every option saves on this device.</p></div>
+    <div class="setLabel">Appearance</div>
+    <div class="setGroup">
+      ${tog('theme','','','')/*placeholder replaced below*/}
+    </div>
+    <div class="setLabel">Sound &amp; haptics</div>
+    <div class="setGroup">
+      ${tog('sound','Sound effects','Taps, hits and rewards','🔊')}
+      ${tog('haptics','Haptic feedback','Subtle vibration on tap','📳')}
+    </div>
+    <div class="setLabel">Daily goal &amp; reminders</div>
+    <div class="setGroup">
+      ${tog('reminder','Daily reminder','A nudge to keep your streak alive','⏰')}
+      <div class="setRow"><span class="ric">🎯</span><span class="lbl"><span class="t">Daily goal</span><span class="d">1 training session per day</span></span><span class="pill">Default</span></div>
+    </div>
+    <div class="card center"><p class="d" style="font-size:12px; color:var(--dim)">Progress is stored only on this device. Clearing your browser data resets it.</p>
+      <button class="btn secondary small" onclick="if(confirm('Reset ALL progress, XP, streak and settings?')){localStorage.removeItem('neuroforge'); location.reload();}">Reset all progress</button></div>
+  `);
+  // build appearance group (theme radio + text size segment + colourblind)
+  const g = app.querySelectorAll('.setGroup')[0];
+  g.innerHTML = `
+    <div class="setRow"><span class="ric">🌙</span><span class="lbl"><span class="t">Dark mode</span><span class="d">Easier on the eyes at night</span></span><span class="tog${p.theme==='dark'?' on':''}" onclick="setPref('theme','${p.theme==='dark'?'light':'dark'}'); settingsScreen();"></span></div>
+    <div class="setRow" style="display:block;"><div style="display:flex; align-items:center; gap:13px; margin-bottom:11px;"><span class="ric">🔠</span><span class="lbl"><span class="t">Text size</span><span class="d">Larger text across the app</span></span></div>
+      <div class="seg">
+        <button class="${p.size==='normal'?'on':''}" onclick="setPref('size','normal'); settingsScreen();">Normal</button>
+        <button class="${p.size==='large'?'on':''}" onclick="setPref('size','large'); settingsScreen();">Large</button>
+        <button class="${p.size==='xl'?'on':''}" onclick="setPref('size','xl'); settingsScreen();">Huge</button>
+      </div></div>
+    <div class="setRow"><span class="ric">🎨</span><span class="lbl"><span class="t">Colour-blind assist</span><span class="d">Adds ✓ / ✕ marks &amp; patterns</span></span><span class="tog${p.cb?' on':''}" onclick="setPref('cb',${!p.cb}); settingsScreen();"></span></div>`;
+}
+
+/* ================= ACHIEVEMENTS SCREEN ================= */
+const ACH_CATALOG = [
+  {ic:'🎖', n:'First Steps', d:'Finish your first session', m:'First Steps'},
+  {ic:'🔥', n:'3-Day Streak', d:'Train 3 days running', m:'3-Day Streak'},
+  {ic:'🔥', n:'Focus Champion', d:'7-day streak', m:'7-Day Streak'},
+  {ic:'👑', n:'Memory Master', d:'30-day streak', m:'30-Day Streak'},
+  {ic:'💎', n:'Perfect Recall', d:'100% on a challenge', m:'Perfect Recall'},
+  {ic:'🧮', n:'Calculation King', d:'90+ calculation score', m:'Calculation King'},
+  {ic:'🎯', n:'Focus Champ', d:'90+ focus score', m:'Focus Champion'},
+  {ic:'🧠', n:'Brain Titan', d:'Brain score 90+', m:'Brain Titan'},
+  {ic:'🏆', n:'New Record', d:'Beat your best brain score', m:'New Best Brain Score'}
+];
+function achievementsScreen(){
+  setNav('awards');
+  const unlocked = ACH_CATALOG.filter(a=>S.achievements.some(x=>x.includes(a.m)));
+  const cards = ACH_CATALOG.map(a=>{
+    const got = S.achievements.some(x=>x.includes(a.m));
+    return `<div class="achCard${got?'':' locked'}" style="${got?'background:var(--yellow);':''}"><div class="ai">${a.ic}</div><div class="an">${a.n}</div><div class="ad">${got?'Unlocked':'🔒 '+a.d}</div></div>`;
+  }).join('');
+  screen(`
+    <div class="card"><h1>🏆 Trophy case</h1>
+      <p>${unlocked.length} of ${ACH_CATALOG.length} unlocked</p>
+      <div class="timerbar" style="height:14px"><div style="width:${Math.round(unlocked.length/ACH_CATALOG.length*100)}%"></div></div>
+    </div>
+    <div class="card"><div class="achGrid">${cards}</div></div>
+    <div class="card center"><h3>Keep going</h3><p>Train daily to unlock streak trophies and push your rank from <b>${rank()}</b> upward.</p>
+      <button class="btn" onclick="navGo('play')">▶ Train now</button></div>
+  `);
+}
+
+/* ================= INSIGHTS SCREEN ================= */
+function insightsScreen(){
+  setNav('insights');
+  const cats=['memory','visual','focus','calc','reasoning','reaction','flexibility'];
+  const names={memory:'Memory',visual:'Visual',focus:'Focus',calc:'Calc',reasoning:'Reasoning',reaction:'Reaction',flexibility:'Flex'};
+  const emoji={memory:'🧠',visual:'👁',focus:'🎯',calc:'🧮',reasoning:'🧩',reaction:'⚡',flexibility:'🔄'};
+  const cols={memory:'var(--accent)',visual:'var(--accent2)',focus:'var(--pink)',calc:'var(--yellow)',reasoning:'#b07bff',reaction:'var(--lime)',flexibility:'#ff9d5c'};
+  // averages from history, fallback to skill level *8
+  const avg = {};
+  cats.forEach(ct=>{
+    const vals = S.history.map(h=>h.cats&&h.cats[ct]).filter(v=>v!=null);
+    avg[ct] = vals.length? Math.round(vals.slice(-7).reduce((a,b)=>a+b,0)/Math.min(vals.length,7)) : Math.round(S.skill[ct]*8);
+  });
+  const present = cats.filter(ct=>avg[ct]!=null);
+  const overall = Math.round(present.reduce((a,ct)=>a+avg[ct],0)/present.length);
+  const gradeOf=v=>v>=90?'S':v>=80?'A':v>=68?'B':v>=55?'C':'D';
+  const sorted = present.slice().sort((a,b)=>avg[b]-avg[a]);
+  const strong=sorted[0], weak=sorted[sorted.length-1];
+  // conic wheel
+  let acc=0; const seg = present.map(ct=>{ const frac=avg[ct]/present.reduce((s,c)=>s+avg[c],0); const a0=acc*360, a1=(acc+frac)*360; acc+=frac; return `${cols[ct]} ${a0}deg ${a1}deg`; }).join(',');
+  const hist = S.history.slice(-14);
+  const chart = hist.length? `<div class="chart">${hist.map(h=>`<div class="bar" style="height:${Math.max(5,h.brain)}%"><span>${h.brain}</span></div>`).join('')}</div>` :
+    `<p class="center">Play a few sessions to see your brain-score trend build here.</p>`;
+  screen(`
+    <div class="card center">
+      <h1>📊 Skill insights</h1>
+      <div style="width:180px; height:180px; margin:14px auto 6px; border-radius:50%; background:conic-gradient(${seg}); display:flex; align-items:center; justify-content:center; border:var(--bw) solid var(--line); box-shadow:var(--card-sh);">
+        <div style="width:104px; height:104px; border-radius:50%; background:var(--panel); border:var(--bw) solid var(--line); display:flex; flex-direction:column; align-items:center; justify-content:center;">
+          <div class="bigNum" style="margin:0; font-size:34px;">${gradeOf(overall)}</div><div class="d" style="font-size:11px; color:var(--dim)">grade · ${overall}</div>
+        </div>
+      </div>
+      <div class="statgrid" style="grid-template-columns:1fr 1fr;">
+        <div class="stat" style="background:var(--lime)"><div class="v">${emoji[strong]} ${names[strong]}</div><div class="l">Strongest · ${avg[strong]}</div></div>
+        <div class="stat" style="background:var(--pink)"><div class="v">${emoji[weak]} ${names[weak]}</div><div class="l">Focus area · ${avg[weak]}</div></div>
+      </div>
+    </div>
+    <div class="card"><h3>Per-skill level</h3>
+      ${cats.map(ct=>`<div class="scorebar"><div class="name">${emoji[ct]} ${names[ct]}</div><div class="track"><div class="fill" style="width:${avg[ct]}%; background:${cols[ct]}"></div></div><div class="val">${avg[ct]}</div></div>`).join('')}
+    </div>
+    <div class="card"><h3>Brain score trend</h3>${chart}
+      <p class="mt">💡 Sessions automatically weight extra practice toward <b>${names[weak]}</b>, your current growth area.</p>
+    </div>
+  `);
+}
+
+/* ================= ONBOARDING ================= */
+function onboarding(){
+  screen(`
+    <div class="card center" style="background:var(--accent); border-color:var(--line); color:#fff;">
+      <div style="width:96px; height:96px; border-radius:28px; background:var(--lime); border:var(--bw) solid var(--line); display:flex; align-items:center; justify-content:center; font-size:52px; margin:6px auto 18px; box-shadow:var(--card-sh);">🧠</div>
+      <h1 style="color:#fff; font-size:30px;">Train your brain daily</h1>
+      <p style="color:#ece4ff; font-size:16px;">32 science-backed challenges that adapt to you — memory, focus, logic, reflexes. About 18 minutes a day.</p>
+    </div>
+    <div class="card">
+      <h3>Pick your look</h3>
+      <div class="seg" style="margin-bottom:16px;">
+        <button class="${S.prefs.theme==='light'?'on':''}" onclick="setPref('theme','light'); onboarding();">☀️ Light</button>
+        <button class="${S.prefs.theme==='dark'?'on':''}" onclick="setPref('theme','dark'); onboarding();">🌙 Dark</button>
+      </div>
+      <h3>How it works</h3>
+      <div class="setGroup" style="box-shadow:none;">
+        <div class="setRow"><span class="ric">🔓</span><span class="lbl"><span class="t">Memorise the Vault code</span><span class="d">Recall it at the very end — the ultimate memory test</span></span></div>
+        <div class="setRow"><span class="ric">🎮</span><span class="lbl"><span class="t">Play 13 quick challenges</span><span class="d">They get harder or easier based on how you do</span></span></div>
+        <div class="setRow"><span class="ric">🔥</span><span class="lbl"><span class="t">Build your streak &amp; brain score</span><span class="d">Earn XP, coins, ranks and trophies</span></span></div>
+      </div>
+      <div class="center mt">
+        <button class="btn" onclick="setPref('onboarded',true); startBreathing();">▶ Start my first session</button>
+        <button class="btn secondary" onclick="setPref('onboarded',true); intro();">Explore first</button>
+      </div>
+    </div>
+  `);
+}
+
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') save(); });
+window.addEventListener('pagehide', save);
+
+/* ================= BOOT ================= */
+applyPrefs();
+refreshHud();
+if(!S.prefs.onboarded){ onboarding(); } else { setNav('home'); intro(); }
+</script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}</script>
+</body>
+</html>
