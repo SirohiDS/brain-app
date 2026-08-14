@@ -34,8 +34,10 @@
   a.app:hover{transform:translate(-2px,-2px); box-shadow:8px 8px 0 var(--line);}
   a.app:active{transform:translate(3px,3px); box-shadow:2px 2px 0 var(--line);}
   a.app.train{background:var(--lime);}
+  a.app.free{background:var(--yellow);}
   a.app.reflex{background:var(--accent);}
   a.app.reflex h2, a.app.reflex p{color:#fff;} a.app.reflex .ic{background:#fff;}
+  a.app:focus-visible{outline:3px solid var(--accent2); outline-offset:3px;}
   .ic{font-size:34px; width:58px; height:58px; display:flex; align-items:center; justify-content:center; flex:none;
     background:#fff; border:2.5px solid var(--line); border-radius:16px;}
   .app h2{font-family:'Sora'; font-weight:800; font-size:17px; margin-bottom:3px;}
@@ -48,15 +50,19 @@
 <body>
   <div class="logo">🧠</div>
   <h1>NeuroForge Suite</h1>
-  <p class="sub">Your daily brain gym. Train memory, focus &amp; logic — then push your reflexes in the 3D arena.</p>
+  <p class="sub">Your daily brain gym. Train memory, focus, logic &amp; language — then push your reflexes in the 3D arena.</p>
   <div class="apps">
     <a class="app train" href="NeuroForge.html">
       <div class="ic">🧩</div>
-      <div><h2>Daily Training</h2><p>32 adaptive challenges · streaks, XP, brain score, detox missions</p></div>
+      <div><h2>Daily Training</h2><p>46 adaptive challenges · streaks, XP, brain score, detox missions</p></div>
+    </a>
+    <a class="app free" href="NeuroForge.html?action=freeplay">
+      <div class="ic">🎮</div>
+      <div><h2>Free Play</h2><p>Pick any single game · filter by skill · per-game personal bests</p></div>
     </a>
     <a class="app reflex" href="ReflexForge.html">
       <div class="ic">⚡</div>
-      <div><h2>ReflexForge Arena</h2><p>5 arcade modes · reaction grades, combos, survival</p></div>
+      <div><h2>ReflexForge Arena</h2><p>9 arcade modes · rhythm, chase, rule-flip, gauntlet, survival</p></div>
     </a>
   </div>
   <p class="foot">Works offline after first load · Progress saves on this device<br>Tip: Share → <b>Add to Home Screen</b> to install as an app</p>
