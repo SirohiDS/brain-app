@@ -19,7 +19,10 @@
   :root{--bg:#f0edff; --panel:#fff; --ink:#1c1636; --dim:#8b83b0; --line:#1c1636;
     --accent:#8b5cff; --accent2:#00c9dc; --lime:#c6ff3c; --yellow:#ffd23c; --pink:#ff7fb0;}
   *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; touch-action:manipulation;}
-  body{min-height:100vh; background:radial-gradient(1200px 800px at 70% -10%, #e2d9ff 0%, var(--bg) 55%);
+  /* iOS Safari's 100vh includes the collapsing toolbar, so it overflows.
+     dvh tracks the real visible height; the vh line is the fallback. */
+  body{min-height:100vh; min-height:100dvh; overscroll-behavior:none;
+    background:radial-gradient(1200px 800px at 70% -10%, #e2d9ff 0%, var(--bg) 55%);
     color:var(--ink); font-family:'Space Grotesk',-apple-system,'Segoe UI',system-ui,sans-serif;
     display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px 16px;
     padding-top:calc(24px + env(safe-area-inset-top)); padding-bottom:calc(24px + env(safe-area-inset-bottom));}

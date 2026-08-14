@@ -6,6 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="ReflexForge">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#101425">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -21,7 +22,8 @@
   }
   *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;
     -webkit-user-select:none; user-select:none; touch-action:manipulation;}
-  html,body{height:100%; overflow:hidden;}
+  /* dvh keeps the arena fully on-screen when the iOS toolbar collapses. */
+  html,body{height:100%; height:100dvh; overflow:hidden; overscroll-behavior:none;}
   body{background:radial-gradient(1400px 900px at 50% -20%, #263063 0%, var(--bg) 60%);
     color:var(--ink); font-family:'Space Grotesk',-apple-system,'Segoe UI',system-ui,sans-serif;
     display:flex; flex-direction:column;}
@@ -178,14 +180,42 @@ const sEnd=()=>{ sfx(392,.12); setTimeout(()=>sfx(523,.12),130); setTimeout(()=>
 const stage = document.getElementById('stage');
 const rnd=n=>Math.floor(Math.random()*n);
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
-document.getElementById('fsBtn').onclick=()=>{
-  const d=document.documentElement;
-  try{
-    if(document.fullscreenElement) document.exitFullscreen();
-    else if(d.requestFullscreen) d.requestFullscreen();
-    else if(d.webkitRequestFullscreen) d.webkitRequestFullscreen();
-  }catch(e){}
-};
+/* iPhone Safari has no Fullscreen API (iPad got it in iPadOS 12+). Hide the
+   button rather than leave a control that silently does nothing. */
+(function setupFullscreen(){
+  const btn = document.getElementById('fsBtn');
+  const d = document.documentElement;
+  const supported = !!(d.requestFullscreen || d.webkitRequestFullscreen);
+  if(!supported){ btn.style.display='none'; return; }
+  btn.onclick=()=>{
+    try{
+      if(document.fullscreenElement || document.webkitFullscreenElement){
+        (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      } else {
+        (d.requestFullscreen || d.webkitRequestFullscreen).call(d);
+      }
+    }catch(e){}
+  };
+})();
+
+/* iOS starts every AudioContext suspended and will only resume it inside a real
+   user gesture. Unlock on the first touch/click so sound works from round one. */
+(function unlockAudio(){
+  const go = ()=>{
+    try{
+      if(!AC) AC = new (window.AudioContext||window.webkitAudioContext)();
+      if(AC.state==='suspended') AC.resume();
+      // Play a silent blip — Safari needs an actual start() to fully unlock.
+      const o=AC.createOscillator(), g=AC.createGain();
+      g.gain.value=0; o.connect(g); g.connect(AC.destination);
+      o.start(); o.stop(AC.currentTime+0.01);
+    }catch(e){}
+    document.removeEventListener('touchend', go);
+    document.removeEventListener('pointerdown', go);
+  };
+  document.addEventListener('touchend', go, {once:false, passive:true});
+  document.addEventListener('pointerdown', go, {once:false, passive:true});
+})();
 
 /* ---------- modes ---------- */
 const MODES = {

@@ -37,7 +37,8 @@
   *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
   html{-webkit-text-size-adjust:100%;}
   body{background:var(--bggrad); background-attachment:fixed; color:var(--ink);
-    font-family:'Space Grotesk',-apple-system,'Segoe UI',system-ui,sans-serif; min-height:100vh;
+    font-family:'Space Grotesk',-apple-system,'Segoe UI',system-ui,sans-serif;
+    min-height:100vh; min-height:100dvh; overscroll-behavior-y:none;
     touch-action:manipulation; transition:background .25s,color .25s;}
   button, .cell, .choice, .simonPad, .reactZone, .goZone, .shapeOpt, .nbBtn, .memoryDisplay, .symbolRow{
     -webkit-user-select:none; user-select:none; touch-action:manipulation;}
@@ -3182,6 +3183,23 @@ function sfx(freq, dur=0.06, type='triangle', vol=0.12){
   }catch(e){}
 }
 function haptic(ms){ if(S.prefs.haptics && navigator.vibrate){ try{ navigator.vibrate(ms); }catch(e){} } }
+/* iOS starts every AudioContext suspended and only resumes it inside a genuine
+   user gesture, so sound stayed dead on iPhone/iPad until this unlock ran. */
+(function unlockAudio(){
+  const go = ()=>{
+    try{
+      if(!AC) AC = new (window.AudioContext||window.webkitAudioContext)();
+      if(AC.state==='suspended') AC.resume();
+      const o=AC.createOscillator(), g=AC.createGain();
+      g.gain.value=0; o.connect(g); g.connect(AC.destination);
+      o.start(); o.stop(AC.currentTime+0.01);
+    }catch(e){}
+    document.removeEventListener('touchend', go);
+    document.removeEventListener('pointerdown', go);
+  };
+  document.addEventListener('touchend', go, {passive:true});
+  document.addEventListener('pointerdown', go, {passive:true});
+})();
 document.addEventListener('pointerdown', (e)=>{
   const t = e.target.closest('.btn, .choice, .cell, .gearBtn, #nav button, .nbBtn, .sortBtn, .flipCard, .shapeOpt, .simonPad, .peg, .palette button, .tog, .seg button');
   if(!t) return;
