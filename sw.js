@@ -1,8 +1,8 @@
 /* NeuroForge service worker
-   v2 — fixes: a single missing asset no longer aborts the whole install,
+   v3 — fixes: a single missing asset no longer aborts the whole install,
    HTML is network-first so updates actually reach the user, and only
    same-origin GETs are cached (Google Fonts requests no longer poison the cache). */
-const CACHE = 'neuroforge-v2';
+const CACHE = 'neuroforge-v3';
 const ASSETS = [
   './',
   './index.html',

@@ -1,7 +1,7 @@
 {
   "name": "NeuroForge — Brain Training Suite",
   "short_name": "NeuroForge",
-  "description": "A daily brain gym: 44 adaptive challenges for memory, focus, logic and language, plus a 9-mode reflex arena.",
+  "description": "A daily brain gym: 46 adaptive challenges for memory, focus, logic and language, plus a 9-mode reflex arena.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

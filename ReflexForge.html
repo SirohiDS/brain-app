@@ -91,7 +91,12 @@
   .ghItem .l{font-size:10.5px; color:var(--dim); text-transform:uppercase; letter-spacing:1px;}
   #combo.hot{color:var(--gold); animation:pulse .4s infinite alternate;}
   @keyframes pulse{from{transform:scale(1);}to{transform:scale(1.15);}}
-  #timeBar{position:absolute; top:0; left:0; height:5px; background:linear-gradient(90deg,var(--accent2),var(--accent)); width:100%; z-index:7; transition:width .2s linear;}
+  /* No CSS transition: the width is driven every frame from requestAnimationFrame.
+     A 200ms transition fighting a 200ms setInterval was what made it stutter. */
+  #timeBar{position:absolute; top:0; left:0; height:5px; z-index:7; width:100%;
+    background:linear-gradient(90deg,var(--accent2),var(--accent));
+    will-change:width; transform:translateZ(0);}
+  #timeBar.low{background:linear-gradient(90deg,var(--gold),var(--bad));}
   #lives{position:absolute; top:10px; right:14px; z-index:7; font-size:20px; letter-spacing:2px;}
   #centerMsg{position:absolute; top:38%; left:0; right:0; text-align:center; font-size:54px; font-weight:900; z-index:9;
     pointer-events:none; text-shadow:0 4px 24px rgba(0,0,0,.6);}
@@ -363,12 +368,21 @@ function startGame(modeKey){
     // time bar
     if(M.dur){
       const tb=document.getElementById('timeBar');
-      const tIv=every(()=>{
-        if(G.over){ stopEvery(tIv); return; }
-        const left = M.dur - (Date.now()-G.startedAt)/1000;
-        if(tb) tb.style.width = Math.max(0, left/M.dur*100)+'%';
-        if(left<=0){ stopEvery(tIv); endGame(); }
-      },200);
+      /* rAF instead of a 200ms interval: smooth at the display refresh rate and
+         accurate against wall-clock even if a frame is dropped. */
+      const t0 = performance.now();
+      const tickBar = (now)=>{
+        if(G.over) return;
+        const elapsed = (now - t0)/1000;
+        const left = M.dur - elapsed;
+        if(tb){
+          tb.style.width = Math.max(0, left/M.dur*100).toFixed(2)+'%';
+          if(left <= 5) tb.classList.add('low');
+        }
+        if(left<=0){ endGame(); return; }
+        G.barRaf = requestAnimationFrame(tickBar);
+      };
+      G.barRaf = requestAnimationFrame(tickBar);
     }
 
     /* Rule Flip: the meaning of purple and red swaps on a timer. */
@@ -556,6 +570,7 @@ function startGame(modeKey){
     if(G.over) return; G.over=true;
     G.timers.forEach(t=>clearTimeout(t)); G.timers.clear();
     G.intervals.forEach(iv=>clearInterval(iv)); G.intervals.clear();
+    if(G.barRaf) cancelAnimationFrame(G.barRaf);
     if(quit){ menu(); return; }
     sEnd();
     const avg = avgRT();

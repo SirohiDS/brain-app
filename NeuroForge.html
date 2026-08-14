@@ -88,8 +88,17 @@
 
   .memoryDisplay{font-family:'Sora'; font-size:24px; font-weight:700; letter-spacing:1px; line-height:1.7; text-align:center; padding:26px 12px;
     background:var(--soft); border:var(--bw) solid var(--line); border-radius:16px; margin:14px 0; word-wrap:break-word; color:var(--ink);}
-  .timerbar{height:12px; background:var(--soft); border:2px solid var(--line); border-radius:99px; overflow:hidden; margin:12px 0;}
-  .timerbar>div{height:100%; background:linear-gradient(90deg,var(--accent2),var(--accent)); width:100%; transition:width .25s linear;}
+  /* Deliberately no CSS transition on width: the bar is driven every frame from
+     requestAnimationFrame, and a transition on the same property caused the stutter. */
+  .timerbar{position:relative; height:14px; background:var(--soft); border:2px solid var(--line);
+    border-radius:99px; overflow:hidden; margin:12px 0;}
+  .timerbar>div{height:100%; background:linear-gradient(90deg,var(--accent2),var(--accent));
+    width:100%; will-change:width; transform:translateZ(0);}
+  .timerbar.urgent>div{background:linear-gradient(90deg,var(--yellow),var(--bad));}
+  .timerWrap{display:flex; align-items:center; gap:10px; margin:12px 0;}
+  .timerWrap .timerbar{flex:1; margin:0;}
+  .timerNum{font-family:'Sora'; font-weight:800; font-size:14px; color:var(--dim);
+    min-width:40px; text-align:right; font-variant-numeric:tabular-nums;}
 
   .grid{display:grid; gap:8px; justify-content:center; margin:16px auto;}
   .cell{width:58px; height:58px; border-radius:12px; background:var(--soft); border:2px solid var(--line); cursor:pointer; transition:background .15s, transform .1s;}
@@ -132,10 +141,10 @@
   .reactZone.wait{background:var(--pink); color:var(--ink);}
   .facecard{display:inline-block; text-align:center; margin:8px; padding:14px 18px; background:var(--panel2); border:2px solid var(--line); border-radius:16px; box-shadow:var(--chip-sh);}
   .facecard .face{font-size:46px;} .facecard .nm{font-family:'Sora'; font-weight:800; margin-top:6px; color:var(--ink);}
-  .symbolRow{font-size:40px; text-align:center; letter-spacing:14px; padding:20px 0; color:var(--ink);}
+  .symbolRow{font-size:40px; text-align:center; letter-spacing:14px; text-indent:14px; padding:20px 0; color:var(--ink);}
   .palette{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:12px;}
   .palette button{font-size:30px; background:var(--panel2); border:var(--bw) solid var(--line); border-radius:14px; padding:8px 14px; cursor:pointer; box-shadow:var(--chip-sh); color:var(--ink);}
-  .seqBuild{min-height:52px; font-size:30px; text-align:center; letter-spacing:10px; background:var(--soft); border:2px solid var(--line); border-radius:14px; padding:10px; margin-top:12px; color:var(--ink);}
+  .seqBuild{min-height:52px; font-size:30px; text-align:center; letter-spacing:10px; text-indent:10px; background:var(--soft); border:2px solid var(--line); border-radius:14px; padding:10px; margin-top:12px; color:var(--ink);}
   .center{text-align:center;}
   .mt{margin-top:16px;}
   .breath{width:140px; height:140px; border-radius:50%; margin:26px auto; background:radial-gradient(circle,var(--accent2),var(--accent));
@@ -263,6 +272,41 @@
   .mzCell{aspect-ratio:1; min-height:38px; display:flex; align-items:center; justify-content:center; font-size:18px;
     box-sizing:border-box;}
 
+  /* ---------- VAULT CODE ---------- */
+  .vaultCode{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:22px 0 18px;}
+  .vaultChar{width:56px; height:68px; display:flex; align-items:center; justify-content:center;
+    font-family:'Sora'; font-weight:800; font-size:34px; color:var(--ink);
+    background:var(--soft); border:var(--bw) solid var(--line); border-radius:14px;
+    box-shadow:var(--chip-sh); font-variant-numeric:tabular-nums;}
+  .vaultTip{background:var(--panel2); border:2px dashed var(--line); border-radius:14px;
+    padding:13px 15px; font-size:13.5px; text-align:left; margin:0 0 16px;}
+  .missionBox{display:flex; flex-direction:column; gap:4px; text-align:left;
+    background:var(--yellow); border:var(--bw) solid var(--line); border-radius:14px;
+    padding:13px 16px; box-shadow:var(--chip-sh);}
+  .missionLabel{font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--gold);}
+  .missionText{font-family:'Sora'; font-weight:700; font-size:14.5px; color:var(--ink); line-height:1.4;}
+
+  /* ---------- LAYOUT CONSISTENCY ----------
+     Challenge screens previously mixed inline-block, float and raw margins, so
+     grids sat off-centre and option rows had ragged gaps. These rules give every
+     game the same centred, evenly-gapped skeleton. */
+  .grid, .lsGrid, .miniGrid, .maze, .simonPads{margin-left:auto; margin-right:auto;}
+  .card > *:last-child{margin-bottom:0;}
+  .choices{align-items:stretch;}
+  .choices .choice{display:flex; align-items:center; justify-content:center; min-height:54px;}
+  .palette{align-items:center;}
+  .palette button{min-width:56px; min-height:52px; display:inline-flex; align-items:center; justify-content:center;}
+  .facewrap{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:14px 0;}
+  .facecard{margin:0;}
+  .foldOpts{align-items:stretch;}
+  .foldOpt{justify-content:center;}
+  .pegRow{align-items:flex-end;}
+  .cardRow{display:flex; flex-wrap:wrap; gap:9px; justify-content:center; margin:16px 0;}
+  .btnRow{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:16px;}
+  .btnRow .btn{margin:0;}
+  /* Inputs inside challenge cards get consistent breathing room */
+  .card input[type=text]{margin-top:12px;}
+
   /* ---------- FREE PLAY BROWSER ---------- */
   .filterRow{display:flex; gap:8px; overflow-x:auto; padding:4px 2px 10px; -webkit-overflow-scrolling:touch;}
   .filterChip{flex:none; padding:9px 15px; border-radius:99px; border:2px solid var(--line); background:var(--panel2);
@@ -372,7 +416,7 @@
     .memoryDisplay{font-size:19px; padding:18px 8px;}
     .bigNum{font-size:34px;}
     .stroopWord{font-size:40px; margin:16px 0;}
-    .symbolRow{font-size:30px; letter-spacing:8px;}
+    .symbolRow{font-size:30px; letter-spacing:8px; text-indent:8px;}
     .choice{flex:1 1 100%; padding:14px;}
     .btn{padding:13px 20px; font-size:15px; width:100%; margin-bottom:8px;}
     .btn.small{width:auto; margin-bottom:0;}
@@ -467,6 +511,7 @@ function startTimeout(fn, ms){
 function clearAllTimers(){
   __timers.forEach(clearInterval); __timers = [];
   __timeouts.forEach(clearTimeout); __timeouts = [];
+  if(typeof cancelAllRafs === 'function') cancelAllRafs();
 }
 function screen(html){ clearAllTimers(); app.innerHTML = html; window.scrollTo(0,0); return app; }
 /* Null-safe DOM lookup — challenges run against a screen that may already be gone. */
@@ -480,15 +525,63 @@ function sample(arr,n){ return shuffle(arr).slice(0,n); }
 function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function norm(s){ return String(s).toLowerCase().trim().replace(/[^a-z0-9 ]/g,''); }
 function clamp(x,a,b){ return Math.max(a, Math.min(b,x)); }
-function gridCols(size){ const px = window.innerWidth<=480? 44 : 58; return `grid-template-columns:repeat(${size},${px}px)`; }
+function gridCols(size){
+  /* Fixed pixel columns overflowed the card on narrow phones once size >= 6.
+     Cap the cell to whatever actually fits the viewport. */
+  const avail = Math.min(window.innerWidth - 72, 560);
+  const ideal = window.innerWidth<=480 ? 44 : 58;
+  const px = Math.max(30, Math.min(ideal, Math.floor((avail - (size-1)*8) / size)));
+  return `grid-template-columns:repeat(${size},${px}px)`;
+}
 
+/* Smooth countdown bar.
+   The old version stepped a 250ms setInterval AND had a 250ms CSS transition on
+   the same property. The two fought each other, and any main-thread jank made
+   the bar visibly stutter and drift away from real time. This drives the width
+   from requestAnimationFrame against wall-clock time: it renders at the display
+   refresh rate and stays accurate even when a frame is dropped. */
+let __rafs = [];
+function cancelAllRafs(){ __rafs.forEach(id=>cancelAnimationFrame(id)); __rafs = []; }
 function countdownBar(el, seconds, onDone){
-  const fill = el.querySelector('div'); let left = seconds;
-  const iv = startInterval(()=>{
-    left -= 0.25; fill.style.width = Math.max(0,(left/seconds)*100)+'%';
-    if(left<=0){ clearInterval(iv); onDone && onDone(); }
-  }, 250);
-  return ()=>clearInterval(iv);
+  if(!el) return function(){};
+  const fill = el.querySelector('div');
+  const label = el.parentElement && el.parentElement.querySelector('.timerNum');
+  const t0 = performance.now();
+  const totalMs = seconds*1000;
+  let raf = null, cancelled = false, warned = false;
+  function frame(now){
+    if(cancelled) return;
+    const elapsed = now - t0;
+    const pct = Math.max(0, 1 - elapsed/totalMs);
+    if(fill) fill.style.width = (pct*100).toFixed(2)+'%';
+    const secsLeft = Math.max(0, Math.ceil((totalMs-elapsed)/1000));
+    if(label && label.textContent !== secsLeft+'s') label.textContent = secsLeft+'s';
+    if(!warned && elapsed > totalMs-3000){ warned = true; el.classList.add('urgent'); }
+    if(elapsed >= totalMs){
+      cancelled = true;
+      el.classList.remove('urgent');
+      if(fill) fill.style.width = '0%';
+      onDone && onDone();
+      return;
+    }
+    raf = requestAnimationFrame(frame); __rafs.push(raf);
+  }
+  raf = requestAnimationFrame(frame); __rafs.push(raf);
+  return function(){ cancelled = true; if(raf) cancelAnimationFrame(raf); el.classList.remove('urgent'); };
+}
+
+/* A 1Hz tick that does not drift. setInterval(fn,1000) accumulates error and
+   stalls when a tab is backgrounded; this re-anchors to wall-clock every tick. */
+function startCountdown(seconds, onTick, onDone){
+  const t0 = Date.now();
+  let last = -1;
+  const iv = startInterval(function(){
+    const left = Math.max(0, seconds - Math.floor((Date.now()-t0)/1000));
+    if(left !== last){ last = left; onTick && onTick(left); }
+    if(left <= 0){ clearInterval(iv); onDone && onDone(); }
+  }, 100);
+  onTick && onTick(seconds);
+  return function(){ clearInterval(iv); };
 }
 
 /* ================= CONTENT BANKS ================= */
@@ -816,39 +909,68 @@ function achBadges(ids){
   }).join('');
 }
 
-/* ================= BREATHING WARM-UP ================= */
+/* ================= SESSION START =================
+   Order changed: the Vault code is now the FIRST thing you see.
+   It used to sit behind a mandatory 30-second breathing screen that had no skip
+   button, so people never reached it and reported that the vault code was never
+   given. Showing it first is also better for the memory task itself — the
+   warm-up then doubles as the delay before recall. */
 function startBreathing(){
   newSession();
-  screen(`
-    <div class="card center">
-      <h2>🫁 30-Second Focus Warm-up</h2>
-      <p>Breathe with the circle. In as it grows, out as it shrinks. This calms your nervous system and primes attention.</p>
-      <div class="breath">breathe</div>
-      <p id="breathCount" class="big">30</p>
-    </div>`);
-  let left = 30;
-  const iv = startInterval(()=>{
-    left--; const el=document.getElementById('breathCount');
-    if(el) el.textContent = left;
-    if(left<=0){ clearInterval(iv); vaultMemorize(); }
-  },1000);
+  vaultMemorize();
 }
 
 /* ================= VAULT (DELAYED RECALL) ================= */
 function vaultMemorize(){
+  if(!session) newSession();
   const len = 4 + Math.floor(S.skill.memory/3);
-  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';   // no confusable I/O/0/1
   let code=''; for(let i=0;i<len;i++) code += chars[rnd(chars.length)];
   session.vault = code;
+  persistSession();
   screen(`
-    <div class="card">
+    <div class="card center">
       <h3>🔐 The Vault · Delayed Recall</h3>
-      <h2>Memorize this vault code</h2>
-      <p>I'll ask for it at the <b>end of the session</b> (~25 min from now). Technique: <b>chunk it</b> — break it into pairs and turn each pair into an image or word.</p>
-      <div class="memoryDisplay">${code}</div>
-      <p>Mission of the day: <b style="color:var(--gold)">${esc(missionById(session.mission).text)}</b></p>
-      <div class="center mt"><button class="btn" onclick="nextChallenge()">I've locked it in →</button></div>
+      <h2>Memorise this vault code</h2>
+      <p>You will be asked for it at the <b>very end</b> of the session. This is the hardest
+        memory task in the app — and the one that improves fastest with practice.</p>
+      <div class="vaultCode">${code.split('').map(ch=>`<span class="vaultChar">${ch}</span>`).join('')}</div>
+      <p class="vaultTip">💡 <b>Chunk it.</b> Break it into pairs and turn each pair into a picture —
+        “${code.slice(0,2)}” then “${code.slice(2,4)}” is two images, not ${len} loose characters.</p>
+      <div class="missionBox">
+        <span class="missionLabel">Today\u2019s mission</span>
+        <span class="missionText">${esc(missionById(session.mission).text)}</span>
+      </div>
+      <div class="center mt">
+        <button class="btn" onclick="warmUpScreen()">I have locked it in →</button>
+      </div>
+      <p class="kbdHint">Nothing on this screen is timed — take as long as you need.</p>
     </div>`);
+}
+
+/* ================= BREATHING WARM-UP (now skippable) ================= */
+function warmUpScreen(){
+  const secs = 30;
+  screen(`
+    <div class="card center">
+      <h3>🫧 Focus Warm-up</h3>
+      <h2>Breathe with the circle</h2>
+      <p>In as it grows, out as it shrinks. This settles your nervous system and primes
+        attention — and puts a gap between seeing the code and recalling it.</p>
+      <div class="breath">breathe</div>
+      <div class="bigNum" id="breathCount">${secs}</div>
+      <div class="center mt">
+        <button class="btn secondary" onclick="beginChallenges()">Skip warm-up →</button>
+      </div>
+    </div>`);
+  startCountdown(secs,
+    function(left){ setText('breathCount', left); },
+    function(){ beginChallenges(); }
+  );
+}
+function beginChallenges(){
+  clearAllTimers();
+  nextChallenge();
 }
 
 function vaultRecall(){
@@ -898,13 +1020,13 @@ function chWordSpan(n,total){
     ${challengeHeader(n,total,'Word Span — remember in order','Memory')}
     <p>Study the words. Link them into one absurd story — vivid images beat repetition.</p>
     <div class="memoryDisplay">${words.join(' · ')}</div>
-    <div class="timerbar"><div></div></div>
+    <div class="timerWrap"><div class="timerbar"><div></div></div><span class="timerNum">--</span></div>
     <div id="answerZone"></div>
     <div class="feedback"></div>
   </div>`);
   const studyTime = Math.max(10, count*2.2);
   countdownBar(c.querySelector('.timerbar'), studyTime, ()=>{
-    c.querySelector('.memoryDisplay').textContent = '● ● ●';
+    const md=c.querySelector('.memoryDisplay'); if(md) md.textContent = '● ● ●';
     c.querySelector('#answerZone').innerHTML = `
       <p class="mt">Type the words <b>in order</b>, separated by spaces or commas:</p>
       <input type="text" id="wsIn" autocomplete="off">
@@ -935,12 +1057,12 @@ function chDigitSpan(n,total){
     ${challengeHeader(n,total, backward?'Backward Digit Span':'Digit Span','Memory')}
     <p>${backward? 'Memorize, then type the digits in REVERSE order. This trains working-memory manipulation, not just storage.' : 'Memorize the digits, then type them in order. Chunk into groups of 3.'}</p>
     <div class="memoryDisplay">${digits.split('').join(' ')}</div>
-    <div class="timerbar"><div></div></div>
+    <div class="timerWrap"><div class="timerbar"><div></div></div><span class="timerNum">--</span></div>
     <div id="answerZone"></div>
     <div class="feedback"></div>
   </div>`);
   countdownBar(c.querySelector('.timerbar'), Math.max(6,len*1.2), ()=>{
-    c.querySelector('.memoryDisplay').textContent='● ● ●';
+    const md=c.querySelector('.memoryDisplay'); if(md) md.textContent='● ● ●';
     c.querySelector('#answerZone').innerHTML = `
       <p class="mt">Enter the digits ${backward?'<b>backwards</b>':''}:</p>
       <input type="text" id="dsIn" inputmode="numeric" autocomplete="off">
@@ -969,7 +1091,7 @@ function chGridFlash(n,total){
     <div class="grid" style="${gridCols(size)}">
       ${Array.from({length:size*size},(_,i)=>`<div class="cell${lit.has(i)?' lit':''}" data-i="${i}"></div>`).join('')}
     </div>
-    <div class="timerbar"><div></div></div>
+    <div class="timerWrap"><div class="timerbar"><div></div></div><span class="timerNum">--</span></div>
     <p class="center" id="gridMsg">Memorizing…</p>
     <div class="feedback"></div>
   </div>`);
@@ -1009,17 +1131,17 @@ function chSymbolSeq(n,total){
     ${challengeHeader(n,total,'Symbol Sequence','Visual')}
     <p>Memorize the order of these symbols, then rebuild the sequence from the palette.</p>
     <div class="symbolRow">${seq.join('')}</div>
-    <div class="timerbar"><div></div></div>
+    <div class="timerWrap"><div class="timerbar"><div></div></div><span class="timerNum">--</span></div>
     <div id="answerZone"></div>
     <div class="feedback"></div>
   </div>`);
   countdownBar(c.querySelector('.timerbar'), 4+len, ()=>{
-    c.querySelector('.symbolRow').textContent='● ● ●';
+    const sr=c.querySelector('.symbolRow'); if(sr) sr.textContent='● ● ●';
     const built=[];
     c.querySelector('#answerZone').innerHTML = `
       <div class="seqBuild" id="seqBuild">&nbsp;</div>
       <div class="palette">${pal.map(s=>`<button data-s="${s}">${s}</button>`).join('')}</div>
-      <div class="center mt"><button class="btn secondary small" id="seqUndo">Undo</button> <button class="btn small" id="seqOk">Submit</button></div>`;
+      <div class="btnRow"><button class="btn secondary small" id="seqUndo">Undo</button><button class="btn small" id="seqOk">Submit</button></div>`;
     const bd = document.getElementById('seqBuild');
     c.querySelectorAll('.palette button').forEach(b=>{
       b.onclick=()=>{ if(built.length<len){ built.push(b.dataset.s); bd.textContent = built.join(''); } };
@@ -1043,8 +1165,8 @@ function chNameFace(n,total){
   const c = screen(`<div class="card">
     ${challengeHeader(n,total,'Names & Faces','Memory')}
     <p>Meet these people. Technique: exaggerate one feature and rhyme it with the name ("Meera has a mirror smile").</p>
-    <div class="center">${pairs.map(p=>`<div class="facecard"><div class="face">${p.f}</div><div class="nm">${p.name}</div></div>`).join('')}</div>
-    <div class="timerbar"><div></div></div>
+    <div class="facewrap">${pairs.map(p=>`<div class="facecard"><div class="face">${p.f}</div><div class="nm">${p.name}</div></div>`).join('')}</div>
+    <div class="timerWrap"><div class="timerbar"><div></div></div><span class="timerNum">--</span></div>
     <div id="answerZone"></div>
     <div class="feedback"></div>
   </div>`);
@@ -1052,7 +1174,10 @@ function chNameFace(n,total){
     const quiz = shuffle(pairs);
     let qi=0, correct=0;
     const zone = c.querySelector('#answerZone');
-    c.querySelector('.center').innerHTML='';
+    if(!zone) return;
+    // Hide the study material and the spent timer before the quiz starts.
+    const faces = c.querySelector('.facewrap');   if(faces) faces.remove();
+    const tw    = c.querySelector('.timerWrap');  if(tw) tw.remove();
     function ask(){
       if(qi>=quiz.length){
         const score=correct/quiz.length;
@@ -1087,12 +1212,12 @@ function chShoppingList(n,total){
     ${challengeHeader(n,total,'Shopping List — free recall','Memory')}
     <p>Use the <b>Method of Loci</b>: place each item at a spot along a familiar route through your home. Front door → hallway → kitchen…</p>
     <div class="memoryDisplay" style="font-size:19px">${items.join(' · ')}</div>
-    <div class="timerbar"><div></div></div>
+    <div class="timerWrap"><div class="timerbar"><div></div></div><span class="timerNum">--</span></div>
     <div id="answerZone"></div>
     <div class="feedback"></div>
   </div>`);
   countdownBar(c.querySelector('.timerbar'), count*2.5, ()=>{
-    c.querySelector('.memoryDisplay').textContent='● ● ●';
+    const md=c.querySelector('.memoryDisplay'); if(md) md.textContent='● ● ●';
     c.querySelector('#answerZone').innerHTML = `
       <p class="mt">Type every item you remember (any order, comma separated):</p>
       <input type="text" id="slIn" autocomplete="off">
@@ -1116,7 +1241,7 @@ function chMathSprint(n,total){
   const c = screen(`<div class="card">
     ${challengeHeader(n,total,'Math Sprint — 60 seconds','Calculation')}
     <p>Answer as many as you can. Speed AND accuracy count. Press Enter to submit.</p>
-    <div class="timerbar"><div></div></div>
+    <div class="timerWrap"><div class="timerbar"><div></div></div><span class="timerNum">--</span></div>
     <div class="bigNum" id="mq">…</div>
     <input type="text" id="mIn" inputmode="decimal" autocomplete="off" placeholder="answer">
     <div class="center mt"><button class="btn" id="mBtn">Submit ✓</button></div>
@@ -1171,7 +1296,7 @@ function chStroop(n,total){
   const c = screen(`<div class="card">
     ${challengeHeader(n,total,'Stroop Test — name the INK color','Focus')}
     <p>Click the <b>color of the ink</b>, NOT the word. Your brain will fight you — that fight is the workout.</p>
-    <div class="timerbar"><div></div></div>
+    <div class="timerWrap"><div class="timerbar"><div></div></div><span class="timerNum">--</span></div>
     <div class="stroopWord" id="stWord">READY</div>
     <div class="choices" id="stChoices"></div>
     <p class="center" id="stStats">0 correct · 0 wrong</p>
@@ -1394,7 +1519,7 @@ function chChessRecall(n,total){
         return `<div class="cell" data-i="${i}" style="font-size:34px; display:flex; align-items:center; justify-content:center;">${p||''}</div>`;
       }).join('')}
     </div>
-    <div class="timerbar"><div></div></div>
+    <div class="timerWrap"><div class="timerbar"><div></div></div><span class="timerNum">--</span></div>
     <p class="center" id="bMsg">Memorizing…</p>
     <div class="feedback"></div>
   </div>`);
@@ -1438,7 +1563,7 @@ function chCountStream(n,total){
   const c = screen(`<div class="card">
     ${challengeHeader(n,total,'Attention Stream','Focus')}
     <p class="big center">Symbols will flash one by one. Count how many times <span style="font-size:28px">${target}</span> appears. Don't count anything else.</p>
-    <div class="symbolRow" id="csFlash" style="font-size:64px; letter-spacing:0;">3</div>
+    <div class="symbolRow" id="csFlash" style="font-size:64px; letter-spacing:0; text-indent:0;">3</div>
     <div id="answerZone"></div>
     <div class="feedback"></div>
   </div>`);
@@ -1487,12 +1612,12 @@ function chStoryRecall(n,total){
     ${challengeHeader(n,total,'Story Recall','Memory')}
     <p>Read once, slowly. See it as a movie scene — names, numbers and places stick when they're images, not words.</p>
     <div class="memoryDisplay" style="font-size:18px; font-weight:500; letter-spacing:0;">${story}</div>
-    <div class="timerbar"><div></div></div>
+    <div class="timerWrap"><div class="timerbar"><div></div></div><span class="timerNum">--</span></div>
     <div id="answerZone"></div>
     <div class="feedback"></div>
   </div>`);
   countdownBar(c.querySelector('.timerbar'), 16, ()=>{
-    c.querySelector('.memoryDisplay').textContent='● ● ●';
+    const md=c.querySelector('.memoryDisplay'); if(md) md.textContent='● ● ●';
     let qi=0, hits=0;
     const zone = c.querySelector('#answerZone');
     function ask(){
@@ -1534,8 +1659,8 @@ function chVisualSearch(n,total){
   const c = screen(`<div class="card">
     ${challengeHeader(n,total,'Visual Search — count the targets','Focus')}
     <p class="big center">Count every <span style="font-size:26px">${target}</span> before time runs out. Scan in rows like reading — random scanning double-counts.</p>
-    <div class="timerbar"><div></div></div>
-    <div class="memoryDisplay" id="vsField" style="font-size:28px; letter-spacing:8px; line-height:1.9;">${shuffled.join('')}</div>
+    <div class="timerWrap"><div class="timerbar"><div></div></div><span class="timerNum">--</span></div>
+    <div class="memoryDisplay" id="vsField" style="font-size:28px; letter-spacing:8px; text-indent:8px; line-height:1.9;">${shuffled.join('')}</div>
     <input type="text" id="vsIn" inputmode="numeric" autocomplete="off" placeholder="how many?">
     <div class="center mt"><button class="btn" id="vsBtn">Submit</button></div>
     <div class="feedback"></div>
@@ -1627,7 +1752,7 @@ function chTaskSwitch(n,total){
   const c = screen(`<div class="card">
     ${challengeHeader(n,total,'Rule Switch','Flexibility')}
     <p>The rule changes constantly. <b>NUMBER rule:</b> is the digit higher or lower than 5? <b>COLOR rule:</b> is it blue or orange? Answer the RULE shown, not the habit.</p>
-    <div class="timerbar"><div></div></div>
+    <div class="timerWrap"><div class="timerbar"><div></div></div><span class="timerNum">--</span></div>
     <p class="center big" id="tsRule" style="font-weight:800">—</p>
     <div class="bigNum" id="tsDigit">—</div>
     <div class="choices" id="tsChoices"></div>
@@ -1887,9 +2012,9 @@ function chAnagram(n,total){
   const c = screen(`<div class="card">
     ${challengeHeader(n,total,'Anagram Forge','Reasoning')}
     <p class="big center">Unscramble this ${word.length}-letter English word:</p>
-    <div class="memoryDisplay" style="letter-spacing:8px">${scr.toUpperCase()}</div>
+    <div class="memoryDisplay" style="letter-spacing:8px; text-indent:8px">${scr.toUpperCase()}</div>
     <input type="text" id="agIn" autocomplete="off">
-    <div class="center mt"><button class="btn" id="agBtn">Submit</button> <button class="btn secondary small" id="agHint">Hint (−30%)</button></div>
+    <div class="btnRow"><button class="btn" id="agBtn">Submit</button><button class="btn secondary small" id="agHint">Hint (−30%)</button></div>
     <div class="feedback"></div>
   </div>`);
   document.getElementById('agIn').focus();
@@ -2000,7 +2125,7 @@ function chWhack(n,total){
   const c = screen(`<div class="card">
     ${challengeHeader(n,total,'Whack-a-Cell','Reaction')}
     <p>Tap the <b style="color:var(--accent)">purple</b> cells the instant they light. NEVER tap <b style="color:var(--bad)">red</b> decoys — they cost 2 points. Speed with restraint.</p>
-    <div class="timerbar"><div></div></div>
+    <div class="timerWrap"><div class="timerbar"><div></div></div><span class="timerNum">--</span></div>
     <div class="grid" style="${gridCols(size)}">
       ${Array.from({length:size*size},(_,i)=>`<div class="cell" data-i="${i}"></div>`).join('')}
     </div>
@@ -2122,7 +2247,7 @@ function chBlitz(n,total){
   const c = screen(`<div class="card">
     ${challengeHeader(n,total,'True / False Blitz','Flexibility')}
     <p>Rapid-fire claims — math, alphabet, logic. Verify each one FAST. The claim types keep switching, so your brain must keep re-loading rules.</p>
-    <div class="timerbar"><div></div></div>
+    <div class="timerWrap"><div class="timerbar"><div></div></div><span class="timerNum">--</span></div>
     <p class="big center" id="bzQ" style="font-size:24px; min-height:64px; font-weight:700;">—</p>
     <div class="choices">
       <button class="choice" id="bzT" style="border-color:var(--good)">✔ TRUE</button>
@@ -2231,7 +2356,7 @@ function chCodeBreaker(n,total){
     <div id="cbRows" class="cbRows"></div>
     <div class="cbCurrent" id="cbCur"></div>
     <div class="palette" id="cbPal">${palette.map(p=>`<button data-p="${p}">${p}</button>`).join('')}</div>
-    <div class="center mt">
+    <div class="btnRow">
       <button class="btn small secondary" id="cbUndo">⌫ Undo</button>
       <button class="btn small" id="cbGo" disabled>Submit guess</button>
     </div>
@@ -2645,7 +2770,7 @@ function chWordChain(n,total){
     ${challengeHeader(n,total,'Word Chain','Flexibility')}
     <p class="big">Name as many <b>${cat.name}</b> as you can in ${secs} seconds — each one must start with the
       <b>last letter</b> of the previous word. Press Enter after each.</p>
-    <div class="timerbar" id="wcBar"><div></div></div>
+    <div class="timerWrap"><div class="timerbar" id="wcBar"><div></div></div><span class="timerNum">--</span></div>
     <input type="text" id="wcIn" autocomplete="off" placeholder="type a ${cat.name.replace(/s$/,'')}…">
     <p class="center big" id="wcNext">Start with any letter</p>
     <div class="chainList" id="wcList"></div>
